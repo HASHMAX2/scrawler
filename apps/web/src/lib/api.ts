@@ -42,6 +42,33 @@ export interface CommunityListItem {
 
 export interface CommunityList { period: string; page: number; page_size: number; total: number; items: CommunityListItem[] }
 
+export interface AreaRollupStats {
+  sales_count: number; sales_value: number | null; median_price: number | null;
+  rental_count: number; median_rent: number | null; estimated_gross_yield_pct: number | null;
+}
+
+export interface AreaListItem extends AreaRollupStats {
+  area_id: number; name: string; hero_image_url: string | null; also_known_as: string | null;
+  child_count: number; descendant_count: number;
+}
+export interface AreaListResponse { period: string; items: AreaListItem[] }
+
+export interface AreaChildItem extends AreaRollupStats {
+  area_id: number; name: string; hero_image_url: string | null; community_key: string; child_count: number;
+}
+
+export interface AreaDetailResponse {
+  area_id: number; name: string; area_type: string; community_key: string; has_dld_link: boolean;
+  breadcrumb: { area_id: number; name: string }[];
+  profile: AreaProfile | null;
+  livability: LivabilityPanel | null;
+  period: string;
+  own_stats: AreaRollupStats;
+  subtree_stats: AreaRollupStats;
+  child_count: number;
+  children: AreaChildItem[];
+}
+
 export interface AreaProfile {
   description: string | null; also_known_as: string | null; hero_image_url: string | null;
   dld_community_name_en: string | null; dld_buildings: number | null; dld_villas: number | null;
@@ -346,6 +373,8 @@ export const api = {
   masterProjectDetail: (slug: string, period: string, building_slug?: string, unit_type?: string, transaction_type?: string) =>
     get<MasterProjectDetail>(`/projects/master/${encodeURIComponent(slug)}`, { period, building_slug, unit_type, transaction_type }),
   constructionWatch: (field?: string, limit = 50) => get<ConstructionWatchResponse>("/construction-watch", { field, limit }),
+  areas: (period: string) => get<AreaListResponse>("/areas", { period }),
+  areaDetail: (areaId: number | string, period: string) => get<AreaDetailResponse>(`/areas/${areaId}`, { period }),
 };
 
 export async function refreshData(): Promise<unknown> {

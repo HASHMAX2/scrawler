@@ -9,6 +9,8 @@ import { Overview } from "./pages/Overview";
 import { Sales } from "./pages/Sales";
 import { Rentals } from "./pages/Rentals";
 import { UnitTypes } from "./pages/UnitTypes";
+import { Areas } from "./pages/Areas";
+import { AreaDetail } from "./pages/AreaDetail";
 import { Communities } from "./pages/Communities";
 import { CommunityDetail } from "./pages/CommunityDetail";
 import { Compare } from "./pages/Compare";
@@ -38,6 +40,8 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/sales" element={<Sales />} />
               <Route path="/rentals" element={<Rentals />} />
               <Route path="/unit-types" element={<UnitTypes />} />
+              <Route path="/areas" element={<Areas />} />
+              <Route path="/areas/:areaId" element={<AreaDetail />} />
               <Route path="/communities" element={<Communities />} />
               <Route path="/communities/:key" element={<CommunityDetail />} />
               <Route path="/projects" element={<Projects />} />

@@ -10,6 +10,7 @@ const NAV_SECTIONS: { title: string; items: { to: string; label: string }[] }[] 
       { to: "/sales", label: "Sales" },
       { to: "/rentals", label: "Rentals" },
       { to: "/unit-types", label: "Unit Types" },
+      { to: "/areas", label: "Areas" },
       { to: "/communities", label: "Communities" },
       { to: "/projects", label: "Projects" },
       { to: "/developers", label: "Developers" },

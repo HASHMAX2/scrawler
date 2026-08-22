@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from apps.api.db import close_shared_connection, get_shared_connection
 from ingestion import warehouse
 from apps.api.routers import (
+    areas,
     communities,
     compare,
     construction_watch,
@@ -49,6 +50,7 @@ app.add_middleware(
 )
 
 app.include_router(overview.router, prefix="/api/overview", tags=["overview"])
+app.include_router(areas.router, prefix="/api/areas", tags=["areas"])
 app.include_router(communities.router, prefix="/api/communities", tags=["communities"])
 app.include_router(sales.router, prefix="/api/sales", tags=["sales"])
 app.include_router(rentals.router, prefix="/api/rentals", tags=["rentals"])
