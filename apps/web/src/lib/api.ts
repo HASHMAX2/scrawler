@@ -50,11 +50,13 @@ export interface AreaRollupStats {
 export interface AreaListItem extends AreaRollupStats {
   area_id: number; name: string; hero_image_url: string | null; also_known_as: string | null;
   child_count: number; descendant_count: number;
+  project_matched_stats: AreaRollupStats;
 }
 export interface AreaListResponse { period: string; items: AreaListItem[] }
 
 export interface AreaChildItem extends AreaRollupStats {
   area_id: number; name: string; hero_image_url: string | null; community_key: string; child_count: number;
+  project_matched_stats: AreaRollupStats;
 }
 
 export interface AreaDetailResponse {
@@ -64,7 +66,9 @@ export interface AreaDetailResponse {
   livability: LivabilityPanel | null;
   period: string;
   own_stats: AreaRollupStats;
+  own_project_matched_stats: AreaRollupStats;
   subtree_stats: AreaRollupStats;
+  subtree_project_matched_stats: AreaRollupStats;
   child_count: number;
   children: AreaChildItem[];
 }

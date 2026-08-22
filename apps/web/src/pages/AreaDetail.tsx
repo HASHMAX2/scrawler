@@ -57,7 +57,7 @@ export function AreaDetail() {
       </div>
 
       <div>
-        <SectionHeader title={data.child_count > 0 ? "Combined Stats (this area + all sub-areas)" : "Stats"} />
+        <SectionHeader title={data.child_count > 0 ? "Combined Stats (this area + all sub-areas, DLD community-level)" : "Stats (DLD community-level)"} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <KpiCard label="Sales" value={data.subtree_stats.sales_count.toLocaleString()} />
           <KpiCard label="Sales Value" value={formatAed(data.subtree_stats.sales_value)} />
@@ -70,6 +70,28 @@ export function AreaDetail() {
           />
         </div>
       </div>
+
+      {(data.subtree_project_matched_stats.sales_count > 0 || data.subtree_project_matched_stats.rental_count > 0) && (
+        <div>
+          <SectionHeader title="Combined Stats (via building-level project matching)" />
+          <p className="text-[10px] text-[var(--text-muted)] -mt-2 mb-2 max-w-2xl">
+            DLD only reports transactions at the broad community level, never per sub-district — these figures instead trace each transaction's building
+            name to its Propsearch-scraped development, which does carry a precise sub-area. Different methodology than the numbers above; may include
+            occasional building-name mismatches.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <KpiCard label="Sales" value={data.subtree_project_matched_stats.sales_count.toLocaleString()} />
+            <KpiCard label="Sales Value" value={formatAed(data.subtree_project_matched_stats.sales_value)} />
+            <KpiCard label="Median Price" value={formatAed(data.subtree_project_matched_stats.median_price)} />
+            <KpiCard label="Rentals" value={data.subtree_project_matched_stats.rental_count.toLocaleString()} />
+            <KpiCard label="Median Rent" value={formatAed(data.subtree_project_matched_stats.median_rent)} />
+            <KpiCard
+              label="Est. Gross Yield"
+              value={data.subtree_project_matched_stats.estimated_gross_yield_pct !== null ? formatPct(data.subtree_project_matched_stats.estimated_gross_yield_pct) : "N/A"}
+            />
+          </div>
+        </div>
+      )}
 
       {data.livability && (data.livability.total_amenities > 0 || data.livability.total_schools > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -104,6 +126,11 @@ export function AreaDetail() {
 
       <div>
         <SectionHeader title={`Sub-Areas (${data.child_count})`} />
+        {data.children.length > 0 && (
+          <p className="text-[10px] text-[var(--text-muted)] -mt-1 mb-3">
+            Sales/rentals shown per sub-area are via project-name matching (see note above) — DLD doesn't report at this grain directly.
+          </p>
+        )}
         {data.children.length === 0 ? (
           <EmptyState title="No sub-areas" detail="This is a leaf area with no further sub-communities scraped." />
         ) : (
@@ -119,6 +146,14 @@ export function AreaDetail() {
 }
 
 function ChildCard({ child, onClick }: { child: AreaChildItem; onClick: () => void }) {
+  // DLD's own area label never resolves this finely, so the direct figures
+  // (child.sales_count/rental_count) are almost always zero for a sub-area —
+  // the project-matched figures are the ones with real signal here.
+  const pm = child.project_matched_stats;
+  const sales = child.sales_count > 0 ? child.sales_count : pm.sales_count;
+  const rentals = child.rental_count > 0 ? child.rental_count : pm.rental_count;
+  const viaProjectMatch = child.sales_count === 0 && child.rental_count === 0 && (pm.sales_count > 0 || pm.rental_count > 0);
+
   return (
     <Card className="overflow-hidden cursor-pointer hover:border-[var(--accent)] transition-colors">
       <button onClick={onClick} className="block w-full text-left">
@@ -139,9 +174,11 @@ function ChildCard({ child, onClick }: { child: AreaChildItem; onClick: () => vo
             {child.child_count > 0 ? `${child.child_count} sub-area${child.child_count !== 1 ? "s" : ""}` : "No further sub-areas"}
           </div>
           <div className="flex justify-between mt-2 text-xs">
-            <span><span className="text-[var(--text-muted)]">Sales:</span> {child.sales_count.toLocaleString()}</span>
-            <span><span className="text-[var(--text-muted)]">Rentals:</span> {child.rental_count.toLocaleString()}</span>
+            <span><span className="text-[var(--text-muted)]">Sales:</span> {sales.toLocaleString()}</span>
+            <span><span className="text-[var(--text-muted)]">Rentals:</span> {rentals.toLocaleString()}</span>
           </div>
+          {pm.median_price !== null && <div className="text-[10px] text-[var(--text-muted)] mt-1">Median: {formatAed(pm.median_price)}</div>}
+          {viaProjectMatch && <div className="text-[9px] text-[var(--text-muted)] mt-0.5 italic">via matched projects</div>}
         </div>
       </button>
     </Card>
