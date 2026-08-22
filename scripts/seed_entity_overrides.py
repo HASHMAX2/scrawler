@@ -163,6 +163,99 @@ PROJECT_OVERRIDES: list[tuple[str, int, str]] = [
     ("classic apartments", 8586, "Sheffield Classic Apartments"),
 ]
 
+# Batch 2: same review standard, generated with an additional area-scoping
+# step — candidates are restricted to scraped developments within the SAME
+# DLD-known area as the project's actual sales (never city-wide), and any
+# raw name that is itself a recognized area/community name (e.g. "AL
+# FURJAN", "MUDON") is excluded outright, since those represent a whole
+# community's worth of scattered sales rather than one building. That
+# combination is what caught and excluded the batch-1-style false positives
+# on a second pass (a project literally named "AL FURJAN" no longer
+# resolves to one arbitrary building within it).
+PROJECT_OVERRIDES_BATCH_2: list[tuple[str, int, str]] = [
+    ("77s", 733, "77s Tower"),
+    ("aeon", 2460, "Aeon Towers"),
+    ("alba", 5490, "Alba Residence"),
+    ("albero", 2462, "Albero Tower"),
+    ("altan", 2461, "Altan Tower"),
+    ("altus", 2463, "Altus Towers"),
+    ("arlo", 2457, "Arlo Tower"),
+    ("avanos", 960, "Avanos Residence"),
+    ("bayview", 430, "Address Bayview"),
+    ("belmont", 3676, "Belmont Town Square"),
+    ("burj views", 7800, "Burj Views Tower A"),
+    ("business tower", 864, "DEC Business Tower"),
+    ("butterfly", 3560, "Butterfly Towers"),
+    ("celadon", 8123, "Celadon 1"),
+    ("celeste", 3034, "Celeste Residence"),
+    ("century", 746, "Century Tower"),
+    ("ciel", 242, "Ciel Vignette Collection"),
+    ("creek palace", 2424, "Creek Palace Residences"),
+    ("d1", 2899, "D1 Tower"),
+    ("eira", 4361, "Eira Residences"),
+    ("electra", 1213, "Acube Electra"),
+    ("elire", 740, "Elire Tower"),
+    ("ellison", 3677, "Ellison Town Square"),
+    ("elmora", 6191, "Elmora Residence"),
+    ("elvira", 2165, "Elvira at Dubai Hills"),
+    ("erantis", 1034, "Erantis Villas"),
+    ("ethan", 1982, "Ethan Residences"),
+    ("fiori", 3671, "Fiori Town Square"),
+    ("firoza", 3730, "Firoza Residence"),
+    ("genesis", 3484, "Genesis By Meraki"),
+    ("ghalia", 23, "Ghalia Tower"),
+    ("grande", 1696, "Grande at The Opera District"),
+    ("hameni", 12, "Hameni Tower"),
+    ("hillcrest", 3667, "Hillcrest Town Square"),
+    ("kaia", 3787, "Kaia Residences"),
+    ("karma", 5488, "Karma Residence"),
+    ("lia", 3716, "Lia Residences"),
+    ("liora", 3731, "Liora Residences"),
+    ("liva", 3633, "Liva Apartments at Town Square"),
+    ("lolena", 52, "Lolena Residence"),
+    ("lunaya", 7058, "Lunaya Terraces"),
+    ("majestine", 682, "Damac Maison Majestine"),
+    ("manhattan", 105, "The Manhattan"),
+    ("marea", 3725, "Marea Residence"),
+    ("marinascape", 367, "Trident Marinascape"),
+    ("monarch", 4262, "Monarch by Zane"),
+    ("montiva", 2489, "Montiva by Vida"),
+    ("nas3", 3556, "NAS3 Residence"),
+    ("niloofar", 2919, "Niloofar Tower"),
+    ("nobles", 555, "Nobles Residential Tower"),
+    ("noore", 7508, "Noore Residences"),
+    ("odessa", 3674, "Odessa Town Square"),
+    ("olbia", 3672, "Olbia Town Square"),
+    ("ora", 3659, "Ora by Nshama"),
+    ("oria", 2458, "Oria Tower"),
+    ("orla by omniyat", 2273, "Orla by Omniyat Dorchester Collection"),
+    ("palladium", 2540, "The Palladium"),
+    ("parkwood", 2166, "Parkwood at Hills Estate"),
+    ("regina", 164, "Regina Tower"),
+    ("rena", 3783, "Rena Residence"),
+    ("rigel", 1456, "Rigel 1 & 2"),
+    ("rivo", 3980, "Rivo by Grovy"),
+    ("silva", 2486, "Silva Tower"),
+    ("skyscape", 1954, "Skyscape Aura"),
+    ("skyvue", 1955, "Skyvue Solair"),
+    ("spica", 124, "Spica Residences"),
+    ("stax", 1197, "Stax Towers"),
+    ("sunvale", 2331, "Sunvale Residences"),
+    ("tenora", 2690, "Damac Maison de Ville Tenora"),
+    ("the grand", 2455, "The Grand at Dubai Creek Harbour"),
+    ("trevino", 1384, "Trevino Residences"),
+    ("una", 209, "Una Apartments"),
+    ("v3", 2513, "V3 Tower"),
+    ("valencia", 1118, "Valencia Residence"),
+    ("valo", 2459, "Valo Tower"),
+    ("vibe", 9118, "Vibe Building 1"),
+    ("weston", 4065, "Weston by Wadan"),
+    # Dropped from the auto-generated batch: ("mangrove 2", 4780, "Mangrove 2 Offices")
+    # — "Offices" signals a non-residential unit type that likely doesn't
+    # match what a bare "Mangrove 2" DLD sale actually is; left unmatched
+    # rather than risk a wrong property-type merge.
+]
+
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
@@ -183,7 +276,7 @@ def main() -> None:
     """)
 
     inserted = 0
-    for raw_key, dev_id, dev_name in PROJECT_OVERRIDES:
+    for raw_key, dev_id, dev_name in PROJECT_OVERRIDES + PROJECT_OVERRIDES_BATCH_2:
         con.execute(
             """
             INSERT INTO entity_alias_overrides (raw_key, entity_type, resolved_entity_id, resolved_by, note)
