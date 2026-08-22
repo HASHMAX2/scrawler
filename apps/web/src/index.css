@@ -2,86 +2,91 @@
 
 /* ============================================================
    Dubai Real Estate Intelligence — design tokens
-   Dark cinematic is the flagship theme (Intelligence Map lives here).
-   Light is available via [data-theme="light"] on <html> for Dashboard-
-   style daytime use. Existing components already consume these var
-   names, so retheming here recolors the whole app with zero component
-   changes.
+   Light is the default theme app-wide (including the Intelligence Map).
+   Dark is available via the header toggle ([data-theme="dark"]).
+   Existing components consume these var names directly, so retheming
+   here recolors the whole app with zero component changes.
    ============================================================ */
 :root {
-  --bg: #08111a;
-  --surface: #0d1721;
-  --surface-2: #121e29;
-  --surface-3: #172633;
-  --border: #21303d;
-  --text: #f2f6fa;
-  --text-muted: #8291a1;
-  --hover-overlay: rgba(242, 246, 250, 0.05);
+  --bg: #f5f8fc;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --surface-3: #e4eaf3;
+  --border: #e2e8f0;
+  --text: #172033;
+  --text-muted: #708096;
+  --hover-overlay: rgba(23, 32, 51, 0.04);
 
-  --accent: #4b9bff;
-  --accent-soft: rgba(75, 155, 255, 0.14);
-  --good: #42d69a;
-  --good-soft: rgba(66, 214, 154, 0.14);
-  --bad: #f2766d;
-  --bad-soft: rgba(242, 118, 109, 0.14);
-  --warn: #ffbd59;
-  --warn-soft: rgba(255, 189, 89, 0.14);
-  --violet: #9b7bff;
-  --violet-soft: rgba(155, 123, 255, 0.14);
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.1);
+  --good: #0f7a56;
+  --good-soft: rgba(15, 122, 86, 0.1);
+  --bad: #c13b2e;
+  --bad-soft: rgba(193, 59, 46, 0.1);
+  --warn: #b45309;
+  --warn-soft: rgba(180, 83, 9, 0.12);
+  --violet: #7c3aed;
+  --violet-soft: rgba(124, 58, 237, 0.1);
 
-  /* Intelligence graph node categories — deliberately desaturated relative
-     to a typical "neon" data-viz palette, so the graph reads as analytical
-     software rather than a game HUD. */
-  --node-market: #6e93d6;
-  --node-area: #4fada3;
-  --node-project: #cf9d55;
-  --node-developer: #8b7fc7;
-  --node-infra: #6fb3ac;
-  --node-unittype: #7590b8;
-  --node-opportunity: #42d69a;
-  --node-risk: #f2766d;
+  /* Intelligence graph — node category colors and the graph's own edge
+     tokens. Deepened relative to their dark-mode counterparts so labels
+     stay readable (WCAG-ish) on a light/white background. */
+  --node-market: #2563eb;
+  --node-area: #0f9488;
+  --node-project: #b45309;
+  --node-developer: #7c3aed;
+  --node-infra: #0369a1;
+  --node-unittype: #4338ca;
+  --node-opportunity: #0f7a56;
+  --node-risk: #c13b2e;
+  --edge-default: #d6e0ea;
+  --graph-canvas: #f8fafd;
 
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display: "Manrope", var(--font-sans);
 }
 
-:root[data-theme="light"] {
-  --bg: #f6f8fc;
-  --surface: #ffffff;
-  --surface-2: #eef2f8;
-  --surface-3: #e4eaf3;
-  --border: #e2e8f0;
-  --text: #162033;
-  --text-muted: #6b7788;
-  --hover-overlay: rgba(22, 32, 51, 0.04);
+:root[data-theme="dark"] {
+  --bg: #08121c;
+  --surface: #111d28;
+  --surface-2: #16232f;
+  --surface-3: #1c2b38;
+  --border: #22313e;
+  --text: #f4f7fa;
+  --text-muted: #8c9aaa;
+  --hover-overlay: rgba(244, 247, 250, 0.05);
 
-  --accent: #1769e0;
-  --accent-soft: rgba(23, 105, 224, 0.1);
-  --good: #0b9b7a;
-  --good-soft: rgba(11, 155, 122, 0.1);
-  --bad: #e6685c;
-  --bad-soft: rgba(230, 104, 92, 0.1);
-  --warn: #f4b740;
-  --warn-soft: rgba(244, 183, 64, 0.12);
-  --violet: #7c3aed;
-  --violet-soft: rgba(124, 58, 237, 0.1);
+  --accent: #4b9bff;
+  --accent-soft: rgba(75, 155, 255, 0.14);
+  --good: #16a87a;
+  --good-soft: rgba(22, 168, 122, 0.14);
+  --bad: #e9655a;
+  --bad-soft: rgba(233, 101, 90, 0.14);
+  --warn: #f5a524;
+  --warn-soft: rgba(245, 165, 36, 0.14);
+  --violet: #8b5cf6;
+  --violet-soft: rgba(139, 92, 246, 0.14);
 
-  --node-market: #3d6dc4;
-  --node-area: #1c9187;
-  --node-project: #b9863f;
-  --node-developer: #6c4fd6;
-  --node-infra: #4a998f;
-  --node-unittype: #4f74a8;
-  --node-opportunity: #0b9b7a;
-  --node-risk: #e6685c;
+  /* Dark mode can afford the spec's full-saturation palette directly —
+     it reads as "cinematic," not neon, once glow is kept restrained
+     (see GraphNode's boxShadow and the .glow-* utilities below). */
+  --node-market: #4b9bff;
+  --node-area: #34d5c4;
+  --node-project: #f5a524;
+  --node-developer: #8b5cf6;
+  --node-infra: #38bdf8;
+  --node-unittype: #7580e0;
+  --node-opportunity: #16a87a;
+  --node-risk: #e9655a;
+  --edge-default: #2b3d4c;
+  --graph-canvas: #0c1722;
 }
 
-/* Intelligence Map follows the document's light/dark theme like the rest
-   of the app (no forced palette) — it just adds a subtle atmospheric
-   backdrop appropriate to whichever theme is active, so the graph still
-   reads as a distinct "space" without breaking day/night consistency. */
+/* The Intelligence Map's atmospheric backdrop — a near-flat "graph
+   canvas" tone (distinct from --bg) with a barely-there radial tint so
+   it doesn't read as a plain solid rectangle, per theme. */
 .intel-scope {
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--accent) 6%, var(--bg)) 0%, var(--bg) 60%);
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--accent) 4%, var(--graph-canvas)) 0%, var(--graph-canvas) 55%);
   color: var(--text);
 }
 
@@ -129,6 +134,16 @@ table {
 .glow-opportunity { box-shadow: 0 0 0 1px color-mix(in srgb, var(--good) 45%, transparent), 0 0 14px 1px color-mix(in srgb, var(--good) 18%, transparent); }
 .glow-risk { box-shadow: 0 0 0 1px color-mix(in srgb, var(--bad) 45%, transparent), 0 0 14px 1px color-mix(in srgb, var(--bad) 18%, transparent); }
 
-@keyframes dash-flow {
-  to { stroke-dashoffset: -16; }
+/* Every node's position is re-set on each layout pass (root ring, drill
+   fan, ancestry trail, etc.) — React Flow applies the new position as an
+   inline `transform: translate(x, y)` on the SAME DOM node (ids are
+   stable across path changes), so a plain CSS transition on transform is
+   enough to make every reposition — drilling in, going back, "+more" —
+   glide instead of jump. This is the actual fix for "no smooth
+   transitions when drilling"; no per-interaction JS animation needed. */
+.react-flow__node {
+  transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.react-flow__edge-path {
+  transition: d 450ms cubic-bezier(0.22, 1, 0.36, 1), stroke 300ms ease, opacity 300ms ease;
 }

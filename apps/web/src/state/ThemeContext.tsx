@@ -14,9 +14,9 @@ const STORAGE_KEY = "dre_theme";
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     try {
-      return (localStorage.getItem(STORAGE_KEY) as Theme) ?? "dark";
+      return (localStorage.getItem(STORAGE_KEY) as Theme) ?? "light";
     } catch {
-      return "dark";
+      return "light";
     }
   });
 
