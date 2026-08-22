@@ -123,7 +123,7 @@ export function ProjectSearchBar() {
               key={`${item.kind}-${item.id}`}
               onClick={() => goTo(item)}
               onMouseEnter={() => setActiveIndex(i)}
-              className={`block w-full text-left px-4 py-2.5 border-b border-[var(--border)]/40 last:border-b-0 ${i === activeIndex ? "bg-white/5" : ""}`}
+              className={`block w-full text-left px-4 py-2.5 border-b border-[var(--border)]/40 last:border-b-0 ${i === activeIndex ? "bg-[var(--hover-overlay)]" : ""}`}
             >
               <div className="text-sm text-[var(--text)]">{item.name}</div>
               <div className="text-xs text-[var(--text-muted)]">{item.subtitle}</div>
@@ -137,7 +137,7 @@ export function ProjectSearchBar() {
                 <button
                   key={name}
                   onClick={() => { setInput(name); setQuery(name); }}
-                  className="block w-full text-left px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5"
+                  className="block w-full text-left px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--hover-overlay)]"
                 >
                   {name}
                 </button>

@@ -63,7 +63,7 @@ export function Explorer() {
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold">Data Explorer</h1>
         <div className="flex items-center gap-2">
-          <button onClick={downloadCsv} className="text-xs border border-[var(--border)] rounded px-3 py-1.5 hover:bg-white/5">Download CSV (this page)</button>
+          <button onClick={downloadCsv} className="text-xs border border-[var(--border)] rounded px-3 py-1.5 hover:bg-[var(--hover-overlay)]">Download CSV (this page)</button>
           <Select value={dataset} onChange={(v) => { setDataset(v as "sales" | "rentals"); setPage(1); }} options={[{ value: "sales", label: "Sales" }, { value: "rentals", label: "Rentals" }]} />
         </div>
       </div>

@@ -1,19 +1,107 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Dubai Real Estate Intelligence — design tokens
+   Dark cinematic is the flagship theme (Intelligence Map lives here).
+   Light is available via [data-theme="light"] on <html> for Dashboard-
+   style daytime use. Existing components already consume these var
+   names, so retheming here recolors the whole app with zero component
+   changes.
+   ============================================================ */
 :root {
-  --bg: #14100d;
-  --surface: #1d1712;
-  --surface-2: #241c16;
-  --border: #382c22;
-  --text: #f2e9dd;
-  --text-muted: #b3a190;
-  --accent: #c98a4b;
-  --accent-soft: #3a2a1a;
-  --good: #6f9e6a;
-  --bad: #c0685c;
-  --warn: #c9a24b;
+  --bg: #08111a;
+  --surface: #0d1721;
+  --surface-2: #121e29;
+  --surface-3: #172633;
+  --border: #21303d;
+  --text: #f2f6fa;
+  --text-muted: #8291a1;
+  --hover-overlay: rgba(242, 246, 250, 0.05);
 
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  --accent: #4b9bff;
+  --accent-soft: rgba(75, 155, 255, 0.14);
+  --good: #42d69a;
+  --good-soft: rgba(66, 214, 154, 0.14);
+  --bad: #f2766d;
+  --bad-soft: rgba(242, 118, 109, 0.14);
+  --warn: #ffbd59;
+  --warn-soft: rgba(255, 189, 89, 0.14);
+  --violet: #9b7bff;
+  --violet-soft: rgba(155, 123, 255, 0.14);
+
+  /* Intelligence graph node categories */
+  --node-market: #4b9bff;
+  --node-area: #37d4c5;
+  --node-project: #ffbd59;
+  --node-developer: #9b7bff;
+  --node-infra: #7fc8c0;
+  --node-unittype: #7aa7e0;
+  --node-opportunity: #42d69a;
+  --node-risk: #f2766d;
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Manrope", var(--font-sans);
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f8fc;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --surface-3: #e4eaf3;
+  --border: #e2e8f0;
+  --text: #162033;
+  --text-muted: #6b7788;
+  --hover-overlay: rgba(22, 32, 51, 0.04);
+
+  --accent: #1769e0;
+  --accent-soft: rgba(23, 105, 224, 0.1);
+  --good: #0b9b7a;
+  --good-soft: rgba(11, 155, 122, 0.1);
+  --bad: #e6685c;
+  --bad-soft: rgba(230, 104, 92, 0.1);
+  --warn: #f4b740;
+  --warn-soft: rgba(244, 183, 64, 0.12);
+  --violet: #7c3aed;
+  --violet-soft: rgba(124, 58, 237, 0.1);
+
+  --node-market: #1769e0;
+  --node-area: #11afa0;
+  --node-project: #f4b740;
+  --node-developer: #7c3aed;
+  --node-infra: #5fb8ae;
+  --node-unittype: #3f7dc9;
+  --node-opportunity: #0b9b7a;
+  --node-risk: #e6685c;
+}
+
+/* Intelligence Map forces the cinematic palette regardless of the
+   document theme — it's the flagship experience and reads correctly
+   only against a dark, atmospheric canvas. */
+.intel-scope {
+  --bg: #08111a;
+  --surface: #0d1721;
+  --surface-2: #121e29;
+  --surface-3: #172633;
+  --border: #21303d;
+  --text: #f2f6fa;
+  --text-muted: #8291a1;
+  --hover-overlay: rgba(242, 246, 250, 0.05);
+  --accent: #4b9bff;
+  --accent-soft: rgba(75, 155, 255, 0.14);
+  --good: #42d69a;
+  --bad: #f2766d;
+  --warn: #ffbd59;
+  --violet: #9b7bff;
+  --node-market: #4b9bff;
+  --node-area: #37d4c5;
+  --node-project: #ffbd59;
+  --node-developer: #9b7bff;
+  --node-infra: #7fc8c0;
+  --node-unittype: #7aa7e0;
+  --node-opportunity: #42d69a;
+  --node-risk: #f2766d;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #101e2c 0%, #08111a 60%);
+  color: var(--text);
 }
 
 * {
@@ -30,6 +118,7 @@ body {
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 14px;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 a {
@@ -52,4 +141,13 @@ table {
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 6px;
+}
+
+/* Reusable glow utilities for the Intelligence Map */
+.glow-accent { box-shadow: 0 0 0 1px rgba(75, 155, 255, 0.35), 0 0 24px 2px rgba(75, 155, 255, 0.25); }
+.glow-opportunity { box-shadow: 0 0 0 1px rgba(66, 214, 154, 0.35), 0 0 24px 2px rgba(66, 214, 154, 0.25); }
+.glow-risk { box-shadow: 0 0 0 1px rgba(242, 118, 109, 0.35), 0 0 24px 2px rgba(242, 118, 109, 0.25); }
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -16; }
 }

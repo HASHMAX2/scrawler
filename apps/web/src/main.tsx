@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import { Layout } from "./components/Layout";
 import { FilterProvider } from "./state/FilterContext";
+import { ThemeProvider } from "./state/ThemeContext";
 import { Overview } from "./pages/Overview";
+import { IntelligenceMap } from "./pages/IntelligenceMap";
 import { Sales } from "./pages/Sales";
 import { Rentals } from "./pages/Rentals";
 import { UnitTypes } from "./pages/UnitTypes";
@@ -32,11 +34,13 @@ const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 60
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
       <FilterProvider>
         <BrowserRouter>
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Overview />} />
+              <Route path="/intelligence-map" element={<IntelligenceMap />} />
               <Route path="/sales" element={<Sales />} />
               <Route path="/rentals" element={<Rentals />} />
               <Route path="/unit-types" element={<UnitTypes />} />
@@ -62,6 +66,7 @@ createRoot(document.getElementById("root")!).render(
           </Routes>
         </BrowserRouter>
       </FilterProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

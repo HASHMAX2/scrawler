@@ -60,7 +60,7 @@ export function ImportData() {
         <button
           onClick={() => refreshMutation.mutate()}
           disabled={refreshMutation.isPending}
-          className="text-sm border border-[var(--border)] rounded px-4 py-2 hover:bg-white/5 disabled:opacity-50"
+          className="text-sm border border-[var(--border)] rounded px-4 py-2 hover:bg-[var(--hover-overlay)] disabled:opacity-50"
         >
           {refreshMutation.isPending ? "Working..." : "Refresh Data (scan DATA FILES DLD)"}
         </button>

@@ -59,6 +59,13 @@ export interface AreaChildItem extends AreaRollupStats {
   project_matched_stats: AreaRollupStats;
 }
 
+export interface AreaProjectItem {
+  master_project_id: number; name: string; slug: string; developer_name: string | null; building_count: number;
+  sales_count: number; median_price: number | null; median_psf: number | null;
+  rental_count: number; median_rent: number | null; estimated_gross_yield_pct: number | null;
+}
+export interface AreaProjectsResponse { period: string; items: AreaProjectItem[] }
+
 export interface AreaDetailResponse {
   area_id: number; name: string; area_type: string; community_key: string; has_dld_link: boolean;
   breadcrumb: { area_id: number; name: string }[];
@@ -379,6 +386,8 @@ export const api = {
   constructionWatch: (field?: string, limit = 50) => get<ConstructionWatchResponse>("/construction-watch", { field, limit }),
   areas: (period: string) => get<AreaListResponse>("/areas", { period }),
   areaDetail: (areaId: number | string, period: string) => get<AreaDetailResponse>(`/areas/${areaId}`, { period }),
+  areaProjects: (areaId: number | string, period: string, limit = 12) =>
+    get<AreaProjectsResponse>(`/areas/${areaId}/projects`, { period, limit }),
 };
 
 export async function refreshData(): Promise<unknown> {

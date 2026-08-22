@@ -44,7 +44,7 @@ export function SignalBadge({ tone, children }: { tone: "good" | "bad" | "warn" 
     good: "text-[var(--good)] bg-[var(--good)]/15 border-[var(--good)]/30",
     bad: "text-[var(--bad)] bg-[var(--bad)]/15 border-[var(--bad)]/30",
     warn: "text-[var(--warn)] bg-[var(--warn)]/15 border-[var(--warn)]/30",
-    neutral: "text-[var(--text-muted)] bg-white/5 border-[var(--border)]",
+    neutral: "text-[var(--text-muted)] bg-[var(--hover-overlay)] border-[var(--border)]",
   };
   return <span className={`rounded px-2 py-0.5 text-xs border ${colorMap[tone]}`}>{children}</span>;
 }

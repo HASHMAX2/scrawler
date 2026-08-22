@@ -74,7 +74,7 @@ export function ProjectIntelligence() {
             <button
               key={o.value}
               onClick={() => setPeriod(o.value)}
-              className={`text-xs px-3 py-1.5 rounded ${period === o.value ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)] hover:bg-white/5"}`}
+              className={`text-xs px-3 py-1.5 rounded ${period === o.value ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)] hover:bg-[var(--hover-overlay)]"}`}
             >
               {o.label}
             </button>
@@ -264,7 +264,7 @@ function BuildingSelector({ data, activeBuildingSlug, onSelect }: { data: Master
     <div className="flex gap-1.5 overflow-x-auto pb-1">
       <button
         onClick={() => onSelect(null)}
-        className={`shrink-0 text-xs px-3 py-1.5 rounded-full border ${!activeBuildingSlug ? "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]" : "border-[var(--border)] text-[var(--text-muted)] hover:bg-white/5"}`}
+        className={`shrink-0 text-xs px-3 py-1.5 rounded-full border ${!activeBuildingSlug ? "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]" : "border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--hover-overlay)]"}`}
       >
         All Buildings
       </button>
@@ -272,7 +272,7 @@ function BuildingSelector({ data, activeBuildingSlug, onSelect }: { data: Master
         <button
           key={b.slug}
           onClick={() => onSelect(b.slug)}
-          className={`shrink-0 text-xs px-3 py-1.5 rounded-full border ${activeBuildingSlug === b.slug ? "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]" : "border-[var(--border)] text-[var(--text-muted)] hover:bg-white/5"}`}
+          className={`shrink-0 text-xs px-3 py-1.5 rounded-full border ${activeBuildingSlug === b.slug ? "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]" : "border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--hover-overlay)]"}`}
         >
           {b.building_label ?? b.name}
         </button>

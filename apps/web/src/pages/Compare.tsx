@@ -66,7 +66,7 @@ export function Compare() {
                   <button
                     key={item.community_key}
                     onClick={() => addKey(item.community_key)}
-                    className="block w-full text-left px-3 py-1.5 text-sm hover:bg-white/5"
+                    className="block w-full text-left px-3 py-1.5 text-sm hover:bg-[var(--hover-overlay)]"
                   >
                     {item.community_name}
                   </button>

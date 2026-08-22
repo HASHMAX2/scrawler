@@ -216,3 +216,71 @@ def area_detail(area_id: int, period: str = "90d", con=Depends(db)):
         "child_count": len(children_rows),
         "children": children,
     }
+
+
+@router.get("/{area_id}/projects")
+def area_projects(area_id: int, period: str = "90d", limit: int = 12, con=Depends(db)):
+    """Master projects with at least one building physically located in this
+    area's subtree, via the same building-level attribution as
+    _project_matched_stats (scraped.developments.area_id). Powers the
+    Intelligence Map's Area -> Project drilldown — no existing endpoint
+    lists projects scoped to an area, so this is purely additive.
+    """
+    window = resolve_period(con, period)
+    subtree = _subtree_ids(con, area_id)
+    if not subtree:
+        return {"period": window.label, "items": []}
+    area_placeholders = ", ".join(["?"] * len(subtree))
+    master_ids = [
+        r[0] for r in con.execute(
+            f"""
+            SELECT DISTINCT dp.master_project_id
+            FROM dim_project dp JOIN scraped.developments d ON dp.matched_development_id = d.id
+            WHERE d.area_id IN ({area_placeholders}) AND dp.master_project_id IS NOT NULL
+            """,
+            subtree,
+        ).fetchall()
+    ]
+    if not master_ids:
+        return {"period": window.label, "items": []}
+    id_placeholders = ", ".join(["?"] * len(master_ids))
+
+    sales = {
+        r[0]: r[1:] for r in con.execute(
+            f"""
+            SELECT dp.master_project_id, count(*), median(fs.trans_value_aed), median(fs.price_per_sqft_aed)
+            FROM fact_sales fs JOIN dim_project dp ON fs.project_id = dp.project_id
+            WHERE dp.master_project_id IN ({id_placeholders}) AND fs.instance_date BETWEEN ? AND ? AND fs.group_en = 'Sales'
+            GROUP BY 1
+            """,
+            master_ids + [window.current_start, window.current_end],
+        ).fetchall()
+    }
+    rentals = {
+        r[0]: r[1:] for r in con.execute(
+            f"""
+            SELECT dp.master_project_id, count(*), median(fr.annual_amount_aed)
+            FROM fact_rentals fr JOIN dim_project dp ON fr.project_id = dp.project_id
+            WHERE dp.master_project_id IN ({id_placeholders}) AND fr.registration_date BETWEEN ? AND ?
+            GROUP BY 1
+            """,
+            master_ids + [window.current_start, window.current_end],
+        ).fetchall()
+    }
+    meta = con.execute(
+        f"SELECT master_project_id, display_name, slug, developer_name, building_count FROM dim_master_project WHERE master_project_id IN ({id_placeholders})",
+        master_ids,
+    ).fetchall()
+
+    items = []
+    for mid, name, slug, dev, bcount in meta:
+        s = sales.get(mid, (0, None, None))
+        r = rentals.get(mid, (0, None))
+        items.append({
+            "master_project_id": mid, "name": name, "slug": slug, "developer_name": dev, "building_count": bcount,
+            "sales_count": s[0], "median_price": s[1], "median_psf": s[2],
+            "rental_count": r[0], "median_rent": r[1],
+            "estimated_gross_yield_pct": estimated_gross_yield(r[1], s[1]),
+        })
+    items.sort(key=lambda x: x["sales_count"] + x["rental_count"], reverse=True)
+    return {"period": window.label, "items": items[:limit]}
