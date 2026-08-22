@@ -24,6 +24,18 @@ from ingestion.normalize import canonical_key
 AUTO_LINK_THRESHOLD = 90
 SUGGEST_THRESHOLD = 75
 
+# A general "raw name's words are a subset of a longer candidate's words"
+# auto-match heuristic was tried and reverted (see git history) — it
+# correctly resolved clean cases like "BAY SQUARE" -> "Bay Square Building
+# 1", but a manual audit of everything it newly matched also turned up
+# real wrong merges purely from coincidental token overlap: "AL FURJAN"
+# (a whole community's worth of DLD sales) landed on "Al Furjan Masjid" — a
+# single mosque — for no reason other than being the shortest candidate
+# containing both words, and "THE DUBAI MALL" landed on an unrelated hotel
+# near Mall of the Emirates. That's exactly the silent-merge risk this
+# module's design explicitly forbids. Cases like Bay Square are handled
+# instead via a manually-reviewed entity_alias_overrides row (see
+# scripts/seed_entity_overrides.py) rather than a blanket heuristic.
 
 @dataclass
 class MatchResult:
