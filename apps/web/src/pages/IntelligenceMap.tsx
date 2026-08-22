@@ -63,6 +63,31 @@ const EDGE_COLOR: Record<string, string> = {
   selected: "var(--accent)",
 };
 
+// Connections are colored by the child's estimated gross yield: green when
+// it clears 7%, coral when it's under 4%, neutral otherwise — the same
+// signal shown as a metric tone in the right panel and the query bar's
+// "yield > 7" filter. Nodes with no calculable yield (no matched
+// transactions) get the neutral color, which is why some lines look
+// "unstyled" — that's an honest reflection of missing data, not a bug.
+function EdgeLegend() {
+  const items: { color: string; label: string }[] = [
+    { color: "var(--accent)", label: "Path to focused node" },
+    { color: "var(--good)", label: "Opportunity — yield ≥ 7%" },
+    { color: "var(--bad)", label: "Risk — yield < 4%" },
+    { color: "var(--border)", label: "No strong signal / no yield data" },
+  ];
+  return (
+    <div className="absolute bottom-24 left-5 z-10 flex flex-col gap-1.5 bg-[var(--surface)]/80 backdrop-blur border border-[var(--border)] rounded-lg px-3 py-2.5">
+      {items.map((it) => (
+        <div key={it.label} className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
+          <span className="w-4 h-[2px] rounded-full shrink-0" style={{ background: it.color }} />
+          {it.label}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function GraphCanvas({
   path, setPath, childrenCache, setChildrenCache, setSelected, period,
 }: {
@@ -217,6 +242,10 @@ function GraphCanvas({
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        onNodeClick={(_event, flowNode) => {
+          const d = flowNode.data as GraphNodeData;
+          d.onSelect(d.node);
+        }}
         fitView
         minZoom={0.35}
         maxZoom={1.4}
@@ -229,6 +258,7 @@ function GraphCanvas({
         <Controls showInteractive={false} className="!bg-[var(--surface)] !border !border-[var(--border)] !shadow-lg [&>button]:!bg-[var(--surface)] [&>button]:!border-[var(--border)] [&>button]:!text-[var(--text)] [&>button:hover]:!bg-[var(--hover-overlay)]" />
       </ReactFlow>
 
+      <EdgeLegend />
       <QueryBar onQuery={handleQuery} explanation={explanation} />
     </div>
   );

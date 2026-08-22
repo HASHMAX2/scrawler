@@ -8,6 +8,12 @@ export type NodeEmphasis = "focused" | "parent" | "child" | "dimmed";
 export interface GraphNodeData extends Record<string, unknown> {
   node: IntelNode;
   emphasis: NodeEmphasis;
+  // Selection is wired centrally via ReactFlow's onNodeClick (see
+  // IntelligenceMap.tsx) — that's the reliable cross-input path. A nested
+  // <button onClick> here would race React Flow's own pointer/drag
+  // handling on the node wrapper and silently swallow real mouse clicks
+  // (drag-threshold detection intercepts the pointerup before it bubbles
+  // to a child element's click handler).
   onSelect: (node: IntelNode) => void;
 }
 
@@ -28,7 +34,7 @@ const SIZE: Record<NodeEmphasis, number> = {
 };
 
 function GraphNodeImpl({ data }: NodeProps) {
-  const { node, emphasis, onSelect } = data as GraphNodeData;
+  const { node, emphasis } = data as GraphNodeData;
   const color = TYPE_COLOR[node.type];
   const size = SIZE[emphasis];
   const isFocused = emphasis === "focused";
@@ -44,8 +50,7 @@ function GraphNodeImpl({ data }: NodeProps) {
     >
       <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
       <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
-      <button
-        onClick={() => onSelect(node)}
+      <div
         className="relative flex items-center justify-center rounded-full transition-transform duration-300 hover:scale-[1.06] cursor-pointer"
         style={{
           width: size,
@@ -65,7 +70,7 @@ function GraphNodeImpl({ data }: NodeProps) {
         >
           {node.name.length > 14 && !isFocused ? `${node.name.slice(0, 13)}…` : node.name}
         </span>
-      </button>
+      </div>
       {node.badge && (
         <span
           className="mt-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full"
