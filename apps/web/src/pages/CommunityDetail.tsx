@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, type LivabilityPanel as LivabilityPanelData } from "../lib/api";
 import { useFilters } from "../state/FilterContext";
 import { Card, ErrorState, KpiCard, LoadingSkeleton, SectionHeader, SignalBadge } from "../components/ui";
-import { formatAed, formatPct } from "../lib/format";
+import { formatAed, formatPct, onHeroImageError, upgradeToXlImage } from "../lib/format";
 
 export function CommunityDetail() {
   const { key } = useParams<{ key: string }>();
@@ -26,7 +26,13 @@ export function CommunityDetail() {
         <Link to="/communities" className="text-xs text-[var(--accent)]">&larr; Communities</Link>
         {profile?.hero_image_url && (
           <div className="mt-2 rounded-lg overflow-hidden border border-[var(--border)]" style={{ height: 160 }}>
-            <img src={profile.hero_image_url} alt={data.community_name} className="w-full h-full object-cover" loading="lazy" />
+            <img
+              src={upgradeToXlImage(profile.hero_image_url)}
+              onError={onHeroImageError(profile.hero_image_url)}
+              alt={data.community_name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
           </div>
         )}
         <div className="flex items-center gap-2 mt-2">

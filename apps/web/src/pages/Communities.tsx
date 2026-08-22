@@ -5,7 +5,7 @@ import { api, type CommunityListItem } from "../lib/api";
 import { useFilters } from "../state/FilterContext";
 import { DataTable, type Column } from "../components/DataTable";
 import { Card, ErrorState, LoadingSkeleton, SignalBadge } from "../components/ui";
-import { formatAed, formatPct, formatPsf } from "../lib/format";
+import { formatAed, formatPct, formatPsf, onHeroImageError, upgradeToXlImage } from "../lib/format";
 
 export function Communities() {
   const { period } = useFilters();
@@ -25,7 +25,13 @@ export function Communities() {
       render: (r) => (
         <span className="flex items-center gap-2">
           {r.hero_image_url ? (
-            <img src={r.hero_image_url} alt="" className="w-8 h-8 rounded object-cover shrink-0" loading="lazy" />
+            <img
+              src={upgradeToXlImage(r.hero_image_url)}
+              onError={onHeroImageError(r.hero_image_url)}
+              alt=""
+              className="w-8 h-8 rounded object-cover shrink-0"
+              loading="lazy"
+            />
           ) : (
             <span className="w-8 h-8 rounded bg-[var(--surface-2)] shrink-0" />
           )}
