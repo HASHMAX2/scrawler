@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ area.name }} - Propsearch Dashboard{% endblock %}
+{% block content %}
+<a href="/areas">&larr; All areas</a>
+<h1>{{ area.name }}</h1>
+<p class="muted">{{ area.description or '' }}</p>
+
+<div class="grid grid-4" style="margin-top:16px;">
+    <div class="stat"><div class="value">{{ coverage.total }}</div><div class="label">Developments</div></div>
+    <div class="stat"><div class="value">{{ status.completed }}</div><div class="label">Completed</div></div>
+    <div class="stat"><div class="value">{{ status.under_construction }}</div><div class="label">Under construction</div></div>
+    <div class="stat"><div class="value">{{ status.planned }}</div><div class="label">Planned</div></div>
+    <div class="stat"><div class="value">{{ status.on_hold + status.delayed }}</div><div class="label">On hold / delayed</div></div>
+    <div class="stat"><div class="value">{{ status.cancelled }}</div><div class="label">Cancelled</div></div>
+    <div class="stat"><div class="value">{{ "{:,}".format(coverage.residential_units) }}</div><div class="label">Known residential units</div></div>
+    <div class="stat"><div class="value">{{ coverage.villas }}</div><div class="label">Known villas</div></div>
+    <div class="stat"><div class="value">{{ coverage.townhouses }}</div><div class="label">Known townhouses</div></div>
+</div>
+
+<div class="card" style="margin-top:16px;">
+    <strong>Unit count coverage:</strong> {{ coverage.known_units }} / {{ coverage.total }} developments
+    ({{ (coverage.known_units / coverage.total * 100) | round(1) if coverage.total else 0 }}%)
+    <div class="progress-bar" style="margin-top:8px;">
+        <div class="fill" style="width: {{ (coverage.known_units / coverage.total * 100) if coverage.total else 0 }}%;"></div>
+    </div>
+</div>
+
+<h2>Location &amp; developer</h2>
+<dl class="kv">
+    <dt>Parent area</dt><dd>{{ area.parent_area_name or '—' }}</dd>
+    <dt>Also known as</dt><dd>{{ area.also_known_as or '—' }}</dd>
+    <dt>Master developer</dt><dd>{{ area.developer_raw or '—' }}</dd>
+    <dt>DLD community</dt>
+    <dd>
+        {% if area.dld_community_name_en %}
+            {{ area.dld_community_name_en }} (code {{ area.dld_community_code }})
+            &mdash; {{ area.dld_buildings }} buildings, {{ area.dld_villas }} villas,
+            {{ "{:,}".format(area.dld_residential_units) if area.dld_residential_units else '—' }} residential units,
+            {{ "{:,}".format(area.dld_commercial_units) if area.dld_commercial_units else '—' }} commercial units
+            <div class="muted" style="font-size:12px;">Official Dubai Land Department community-level stats — a different figure than Propsearch's own development count above; see PROPSEARCH_STRUCTURE.md.</div>
+        {% else %}
+            —
+        {% endif %}
+    </dd>
+    <dt>Propsearch's own count</dt>
+    <dd>{{ area.propsearch_dev_summary_raw or '—' }}</dd>
+</dl>
+
+{% if subcommunities %}
+<h2>Sub-communities ({{ subcommunities|length }})</h2>
+<div class="pill-list">
+    {% for sc in subcommunities %}
+    <span class="badge badge-other">{{ sc.name }} &mdash; {{ sc.raw_status or 'unknown' }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h2>Developments ({{ developments|length }} shown, {{ coverage.total }} total)</h2>
+{% if developments %}
+<table>
+    <tr><th>Name</th><th>Developer</th><th>Status</th><th>Type</th><th>Total units</th></tr>
+    {% for d in developments %}
+    <tr>
+        <td><a href="/developments/{{ d.id }}">{{ d.name }}</a></td>
+        <td class="muted">{{ d.developer_name or '—' }}</td>
+        <td><span class="badge badge-{{ d.normalized_status }}">{{ d.raw_status or 'unknown' }}</span></td>
+        <td class="muted">{{ d.building_type_raw or '—' }}</td>
+        <td>{{ d.total_units if d.total_units is not none else 'UNKNOWN' }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<div class="card empty-state">No developments scraped for this area yet. Run the /buildings crawl step.</div>
+{% endif %}
+{% endblock %}

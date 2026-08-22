@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Overview - Propsearch Dashboard{% endblock %}
+{% block content %}
+
+<h1>Crawl overview</h1>
+
+{% if not db_exists or not job %}
+<div class="card empty-state">
+    No crawl data yet. Run <code>python scraper.py https://propsearch.ae/dubai/jumeirah-village-circle</code>
+    to get started.
+</div>
+{% else %}
+
+<div class="card" style="margin-bottom:16px;">
+    <div class="section-title">
+        <div>
+            <strong>Job #{{ job.id }}</strong>
+            <span class="badge badge-{{ job.status }}">{{ job.status }}</span>
+            <div class="muted" style="margin-top:4px;">Seed: {{ job.seed_url }}</div>
+        </div>
+        <div class="muted">Elapsed: {{ elapsed }}</div>
+    </div>
+    <div class="grid grid-4" style="margin-top:16px;">
+        <div class="stat"><div class="value">{{ job.pages_discovered }}</div><div class="label">Discovered</div></div>
+        <div class="stat"><div class="value">{{ job.pages_processed }}</div><div class="label">Processed</div></div>
+        <div class="stat"><div class="value">{{ queue.get('pending', 0) }}</div><div class="label">Remaining</div></div>
+        <div class="stat"><div class="value">{{ job.pages_failed }}</div><div class="label">Failed</div></div>
+    </div>
+    {% set done = queue.get('done', 0) %}
+    {% set total_q = (queue.values() | sum) %}
+    {% if total_q > 0 %}
+    <div class="progress-bar" style="margin-top:16px;">
+        <div class="fill" style="width: {{ (done / total_q * 100) | round(1) }}%;"></div>
+    </div>
+    <div class="muted" style="margin-top:4px; font-size:12px;">
+        {{ done }} / {{ total_q }} queued URLs processed
+        &middot; {{ job.pages_blocked }} blocked
+        &middot; {{ queue.get('failed', 0) }} failed (retryable)
+    </div>
+    {% endif %}
+    {% if queue.get('pending', 0) > 0 %}
+    <div class="muted" style="margin-top:8px;">Crawl not finished — re-run the same <code>scraper.py</code> command to resume.</div>
+    {% endif %}
+</div>
+
+<h2>Database overview</h2>
+<div class="grid grid-4">
+    <div class="stat"><div class="value">{{ overview.areas }}</div><div class="label">Areas / communities</div></div>
+    <div class="stat"><div class="value">{{ overview.sub_communities }}</div><div class="label">Sub-communities</div></div>
+    <div class="stat"><div class="value">{{ overview.developments }}</div><div class="label">Developments (active)</div></div>
+    <div class="stat"><div class="value">{{ overview.buildings }}</div><div class="label">Buildings / towers</div></div>
+    <div class="stat"><div class="value">{{ overview.developers }}</div><div class="label">Developers</div></div>
+    <div class="stat"><div class="value">{{ "{:,}".format(overview.known_residential_units) }}</div><div class="label">Known units (sum of totals)</div></div>
+    <div class="stat"><div class="value">{{ overview.villas }}</div><div class="label">Villa-type developments</div></div>
+    <div class="stat"><div class="value">{{ overview.townhouses }}</div><div class="label">Townhouse-type developments</div></div>
+    <div class="stat"><div class="value">{{ overview.transactions }}</div><div class="label">Transactions</div></div>
+    <div class="stat"><div class="value">{{ overview.amenities }}</div><div class="label">Amenities / POIs</div></div>
+    <div class="stat"><div class="value">{{ overview.schools }}</div><div class="label">Schools</div></div>
+    <div class="stat"><div class="value">{{ overview.developments_inactive }}</div><div class="label">Inactive (disappeared)</div></div>
+</div>
+
+<h2>Crawl health &amp; classification</h2>
+<div class="grid grid-4">
+    <div class="stat"><div class="value">{{ health.requests_today }}</div><div class="label">Requests today (UTC)</div></div>
+    <div class="stat"><div class="value">{{ health.mall_count }}</div><div class="label">Areas classified: mall</div></div>
+    <div class="stat"><div class="value">{{ health.landmark_count }}</div><div class="label">Areas classified: landmark</div></div>
+    <div class="stat"><div class="value">{{ health.mentioned_places }}</div><div class="label">Mentioned places</div></div>
+    <div class="stat"><div class="value">{{ health.entity_aliases }}</div><div class="label">Entity aliases</div></div>
+</div>
+{% if health.last_error %}
+<div class="muted" style="margin-top:8px; font-size:12px;">
+    Last error: <code>{{ health.last_error.error }}</code>
+    {% if health.last_error.http_status %}(HTTP {{ health.last_error.http_status }}){% endif %}
+    on {{ health.last_error.url }} &middot; {{ health.last_error.occurred_at }}
+</div>
+{% else %}
+<div class="muted" style="margin-top:8px; font-size:12px;">No crawl errors logged.</div>
+{% endif %}
+
+<h2>Status breakdown</h2>
+<div class="grid grid-4">
+    {% for key in ['completed', 'under_construction', 'planned', 'announced', 'on_hold', 'delayed', 'cancelled', 'other'] %}
+    <div class="stat"><div class="value">{{ status[key] }}</div><div class="label">{{ key.replace('_', ' ') }}</div></div>
+    {% endfor %}
+</div>
+
+<h2>Data quality</h2>
+<table>
+    <tr><th>Field</th><th>Known</th><th>Missing</th><th>Coverage</th></tr>
+    <tr>
+        <td>Unit count</td><td>{{ quality.with_unit_count }}</td><td>{{ quality.missing_unit_count }}</td>
+        <td>{{ (quality.with_unit_count / quality.total * 100) | round(1) if quality.total else 0 }}%</td>
+    </tr>
+    <tr>
+        <td>Developer</td><td>{{ quality.with_developer }}</td><td>{{ quality.missing_developer }}</td>
+        <td>{{ (quality.with_developer / quality.total * 100) | round(1) if quality.total else 0 }}%</td>
+    </tr>
+    <tr>
+        <td>Location (coordinates)</td><td>{{ quality.with_location }}</td><td>{{ quality.missing_location }}</td>
+        <td>{{ (quality.with_location / quality.total * 100) | round(1) if quality.total else 0 }}%</td>
+    </tr>
+    <tr>
+        <td>Status</td><td>{{ quality.with_status }}</td><td>{{ quality.missing_status }}</td>
+        <td>{{ (quality.with_status / quality.total * 100) | round(1) if quality.total else 0 }}%</td>
+    </tr>
+</table>
+
+<div class="grid grid-2" style="margin-top:24px; align-items:start;">
+    <div>
+        <h2>Recent discoveries</h2>
+        {% if discoveries %}
+        <table>
+            <tr><th>Type</th><th>URL</th><th>When</th></tr>
+            {% for d in discoveries %}
+            <tr>
+                <td>{{ d.entity_type }}</td>
+                <td><a href="{{ d.entity_url }}" target="_blank">{{ d.entity_url.split('/')[-1] }}</a></td>
+                <td class="muted">{{ d.detected_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="card empty-state">Nothing yet.</div>
+        {% endif %}
+    </div>
+    <div>
+        <h2>Recent changes</h2>
+        {% if changes %}
+        <table>
+            <tr><th>Field</th><th>Change</th><th>When</th></tr>
+            {% for c in changes %}
+            <tr>
+                <td>{{ c.field_name }}</td>
+                <td>
+                    {% if c.change_kind == 'disappeared' %}
+                        <span class="muted">page disappeared</span>
+                    {% else %}
+                        {{ c.old_value or '—' }} &rarr; {{ c.new_value or '—' }}
+                    {% endif %}
+                </td>
+                <td class="muted">{{ c.detected_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="card empty-state">Nothing yet — run the scraper again later to see changes.</div>
+        {% endif %}
+    </div>
+</div>
+
+{% if job.pages_blocked > 0 %}
+<div class="card" style="margin-top:24px; border-color: var(--bad);">
+    <strong style="color: var(--bad);">Blocked pages detected</strong>
+    <p class="muted">The crawler backed off after detecting {{ job.pages_blocked }} blocked/challenge response(s).
+    Check the logs before re-running.</p>
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}

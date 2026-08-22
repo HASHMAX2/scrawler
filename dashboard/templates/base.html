@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Propsearch Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="/">Propsearch Dashboard</a>
+    <a href="/">Overview</a>
+    <a href="/areas">Areas</a>
+    <a href="/developments">Developments</a>
+    <a href="/export">Export</a>
+</header>
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

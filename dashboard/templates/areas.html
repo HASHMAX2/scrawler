@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Areas - Propsearch Dashboard{% endblock %}
+{% block content %}
+<h1>Areas &amp; communities</h1>
+
+<form class="filters" method="get">
+    <input type="text" name="search" placeholder="Search areas..." value="{{ search }}">
+    <button type="submit">Search</button>
+</form>
+
+{% if areas %}
+<table>
+    <tr>
+        <th>Area</th><th>Parent</th><th>Developer</th>
+        <th>Developments</th><th>DLD Buildings</th><th>DLD Residential Units</th>
+    </tr>
+    {% for a in areas %}
+    <tr>
+        <td><a href="/areas/{{ a.id }}">{{ a.name }}</a></td>
+        <td class="muted">{{ a.parent_area_name or '—' }}</td>
+        <td class="muted">{{ a.developer_raw or '—' }}</td>
+        <td>{{ a.development_count }}</td>
+        <td>{{ a.dld_buildings if a.dld_buildings is not none else '—' }}</td>
+        <td>{{ "{:,}".format(a.dld_residential_units) if a.dld_residential_units is not none else '—' }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<div class="card empty-state">No areas scraped yet.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+data/propsearch.db
+data/propsearch.db-journal
+data/propsearch.db-wal
+data/propsearch.db-shm
+data/warehouse.duckdb
+data/raw/*.html
+DATA FILES DLD/
+exports/*.csv
+exports/*.json
+!tests/fixtures/*.html
+.pytest_cache/
+.claude/scheduled_tasks.lock

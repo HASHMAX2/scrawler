@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}{{ dev.name }} - Propsearch Dashboard{% endblock %}
+{% block content %}
+<a href="/developments">&larr; All developments</a>
+<h1>{{ dev.name }}</h1>
+<span class="badge badge-{{ dev.normalized_status }}">{{ dev.raw_status or 'unknown' }}</span>
+{% if dev.is_multi_building %}<span class="badge badge-other">Multi-building complex</span>{% endif %}
+
+{% if master %}
+<p class="muted">Part of <a href="/developments/{{ master.id }}">{{ master.name }}</a></p>
+{% endif %}
+
+<div class="grid grid-4" style="margin-top:16px;">
+    <div class="stat"><div class="value">{{ dev.total_units if dev.total_units is not none else 'UNKNOWN' }}</div><div class="label">Total units</div></div>
+    <div class="stat"><div class="value">{{ buildings|length }}</div><div class="label">Buildings</div></div>
+    <div class="stat"><div class="value">{{ dev.storeys_raw or '—' }}</div><div class="label">Floors / storeys</div></div>
+    <div class="stat"><div class="value">{{ transactions|length }}</div><div class="label">Transactions on record</div></div>
+</div>
+
+<h2>Identity</h2>
+<dl class="kv">
+    <dt>Developer</dt><dd>{% if dev.developer_url %}<a href="{{ dev.developer_url }}" target="_blank">{{ dev.developer_name }}</a>{% else %}{{ dev.developer_name or '—' }}{% endif %}</dd>
+    <dt>Community</dt><dd>{% if dev.area_id %}<a href="/areas/{{ dev.area_id }}">{{ dev.area_name }}</a>{% else %}{{ dev.area_raw or '—' }}{% endif %}</dd>
+    <dt>Sub-community / district</dt><dd>{{ dev.area_raw or '—' }}</dd>
+    <dt>Development type</dt><dd>{{ dev.building_type_raw or '—' }}</dd>
+    <dt>Coordinates</dt><dd>{% if dev.latitude %}{{ dev.latitude }}, {{ dev.longitude }}{% else %}—{% endif %}</dd>
+    <dt>Propsearch source</dt><dd><a href="{{ dev.url }}" target="_blank">{{ dev.url }}</a></dd>
+    <dt>First seen</dt><dd>{{ dev.first_seen }}</dd>
+    <dt>Last seen</dt><dd>{{ dev.last_seen }}</dd>
+</dl>
+
+{% if buildings %}
+<h2>Buildings in this development</h2>
+<table>
+    <tr><th>Name</th><th>Storeys</th></tr>
+    {% for b in buildings %}
+    <tr><td><a href="{{ b.url }}" target="_blank">{{ b.name }}</a></td><td>{{ b.storeys_raw or '—' }}</td></tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if sub_devs %}
+<h2>Sub-buildings (own development records)</h2>
+<table>
+    <tr><th>Name</th><th>Status</th><th>Units</th></tr>
+    {% for s in sub_devs %}
+    <tr>
+        <td><a href="/developments/{{ s.id }}">{{ s.name }}</a></td>
+        <td><span class="badge badge-{{ s.normalized_status }}">{{ s.raw_status or 'unknown' }}</span></td>
+        <td>{{ s.total_units if s.total_units is not none else 'UNKNOWN' }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+<h2>Construction</h2>
+<dl class="kv">
+    <dt>Construction start</dt><dd>{{ dev.construction_start_raw or '—' }}{% if dev.construction_start_date %} ({{ dev.construction_start_date }}){% endif %}</dd>
+    <dt>Estimated completion</dt><dd>{{ dev.estimated_completion_raw or '—' }}{% if dev.estimated_completion_date %} ({{ dev.estimated_completion_date }}){% endif %}</dd>
+    <dt>Actual completion</dt><dd>{{ dev.actual_completion_raw or '—' }}{% if dev.actual_completion_date %} ({{ dev.actual_completion_date }}){% endif %}</dd>
+    <dt>Project value</dt><dd>{{ dev.project_value_raw or '—' }}</dd>
+    <dt>Plot reference</dt><dd>{{ dev.plot_reference or '—' }}</dd>
+</dl>
+
+{% if companies %}
+<h3>Companies involved</h3>
+<table>
+    <tr><th>Role</th><th>Company</th></tr>
+    {% for c in companies %}
+    <tr><td>{{ c.role }}</td><td><a href="{{ c.company_url }}" target="_blank">{{ c.company_name }}</a></td></tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if milestones %}
+<h3>Milestones</h3>
+<table>
+    <tr><th>Milestone</th><th>Date</th></tr>
+    {% for m in milestones %}
+    <tr><td>{{ m.label }}</td><td>{{ m.date_raw }}</td></tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if transactions %}
+<h2>Recent transactions</h2>
+<table>
+    <tr><th>Date</th><th>Type</th><th>Room</th><th>Size (sqft)</th><th>Price (AED)</th><th>AED/sqft</th></tr>
+    {% for t in transactions %}
+    <tr>
+        <td>{{ t.transaction_date or t.transaction_date_raw }}</td>
+        <td class="muted">{{ t.transaction_type }}</td>
+        <td class="muted">{{ t.room_type }} {{ t.property_subtype }}</td>
+        <td>{{ t.size_sqft }}</td>
+        <td>{{ "{:,.0f}".format(t.price_aed) if t.price_aed else '—' }}</td>
+        <td>{{ t.price_per_sqft_aed }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if changes %}
+<h2>Change history</h2>
+<table>
+    <tr><th>Field</th><th>Change</th><th>When</th></tr>
+    {% for c in changes %}
+    <tr>
+        <td>{{ c.field_name }}</td>
+        <td>{% if c.change_kind == 'new_record' %}<span class="muted">first discovered</span>{% else %}{{ c.old_value or '—' }} &rarr; {{ c.new_value or '—' }}{% endif %}</td>
+        <td class="muted">{{ c.detected_at }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+<h2>Raw scraped values (debugging)</h2>
+<dl class="kv">
+    <dt>total_units_raw</dt><dd class="muted">{{ dev.total_units_raw or '—' }}</dd>
+    <dt>key_dates_raw</dt><dd class="muted">{{ dev.key_dates_raw or '—' }}</dd>
+    <dt>timeline_summary_raw</dt><dd class="muted">{{ dev.timeline_summary_raw or '—' }}</dd>
+    <dt>history_text</dt><dd class="muted">{{ dev.history_text or '—' }}</dd>
+</dl>
+{% endblock %}

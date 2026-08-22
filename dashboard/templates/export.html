@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Export - Propsearch Dashboard{% endblock %}
+{% block content %}
+<h1>Export</h1>
+<p class="muted">Every table can be exported to CSV or JSON. Files are written to the <code>exports/</code> folder and downloaded directly.</p>
+
+<div style="margin: 16px 0;">
+    <a href="/export/csv/all"><button style="padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:white;cursor:pointer;">Export all tables to CSV</button></a>
+    <a href="/export/json/all" style="margin-left:8px;"><button style="padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:white;cursor:pointer;">Export all tables to JSON</button></a>
+    <a href="/export/combined" style="margin-left:8px;"><button style="padding:8px 16px;border:none;border-radius:6px;background:#111827;color:white;cursor:pointer;">Download combined nested JSON</button></a>
+</div>
+
+<table>
+    <tr><th>Table</th><th>CSV</th><th>JSON</th></tr>
+    {% for t in tables %}
+    <tr>
+        <td>{{ t }}</td>
+        <td><a href="/export/csv/{{ t }}">Download {{ t }}.csv</a></td>
+        <td><a href="/export/json/{{ t }}">Download {{ t }}.json</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,2355 @@
+# BUILD A COMPLETE DUBAI REAL ESTATE INTELLIGENCE APPLICATION
+
+You are working on an existing real-estate data/scraping project.
+
+The scraper is successfully collecting data, but the raw CSV/JSON files are practically useless to a non-technical real-estate broker.
+
+I now want you to build a **full-blown local-first Real Estate Intelligence application** that automatically ingests this data, normalizes it, analyzes it, visualizes it, and helps me make actual investment and sales decisions.
+
+This is NOT supposed to be:
+
+* a CSV viewer
+* a basic admin dashboard
+* a few charts
+* a CRM
+* a property listing website
+* a toy analytics demo
+
+It should feel like an internal **Bloomberg / Property Monitor / REIDIN-style intelligence terminal for Dubai real estate**, optimized for a broker/investor.
+
+---
+
+# 1. CURRENT DATA
+
+My scraper currently produces files similar to:
+
+```text
+amenities.csv
+amenities.json
+
+areas.csv
+areas.json
+
+buildings.csv
+buildings.json
+
+combined.json
+
+construction_history.csv
+construction_history.json
+
+construction_milestones.csv
+construction_milestones.json
+
+developers.csv
+developers.json
+
+developments.csv
+developments.json
+
+documents.csv
+documents.json
+
+schools.csv
+schools.json
+
+sub_communities.csv
+sub_communities.json
+
+transactions.csv
+transactions.json
+
+unit_supply.csv
+unit_supply.json
+```
+
+There may be additional datasets later.
+
+The architecture MUST NOT depend on these exact schemas remaining unchanged.
+
+Create a flexible ingestion/mapping layer.
+
+---
+
+# 2. ADDITIONAL DLD DATA I WILL PROVIDE
+
+I will also provide approximately six months of:
+
+### DLD sales transaction data
+
+Potential fields may include:
+
+* transaction date
+* area
+* project
+* building
+* property type
+* unit type
+* bedrooms
+* transaction value
+* size
+* price per sqft
+* sale type
+* off-plan / ready
+* developer
+* registration information
+* land number / project identifier
+* other DLD fields
+
+### DLD rental transaction data
+
+Potential fields may include:
+
+* contract date
+* community
+* project
+* building
+* bedrooms
+* unit type
+* property type
+* annual rent
+* contract type
+* new / renewed
+* area
+* size
+* Ejari-related fields
+* other available fields
+
+The system MUST support importing newer DLD datasets later without rebuilding the application.
+
+---
+
+# 3. MAIN OBJECTIVE
+
+Turn all of this data into:
+
+> **usable intelligence for a Dubai real-estate broker/investor.**
+
+The app should answer:
+
+### WHAT IS SELLING?
+
+* projects with most transactions
+* buildings with most transactions
+* communities with most transactions
+* developers with most sales
+* property types selling most
+* bedroom configurations selling most
+* off-plan vs ready demand
+* transaction value
+* average ticket price
+* median ticket price
+* price per sqft
+* sales velocity
+* week-over-week momentum
+* month-over-month momentum
+
+### WHAT IS RENTING?
+
+* communities with most rental contracts
+* projects with most rentals
+* buildings with most rentals
+* studios vs 1BR vs 2BR vs 3BR demand
+* apartments vs villas vs townhouses
+* new leases vs renewals
+* average rents
+* median rents
+* rent per sqft where possible
+* rental demand momentum
+* rental seasonality
+
+### WHAT SHOULD I BUY / SELL?
+
+The application should derive useful signals rather than simply displaying statistics.
+
+---
+
+# 4. DATA ARCHITECTURE
+
+Create a proper data layer.
+
+Do NOT make React load dozens of CSV files directly.
+
+Use:
+
+### Local analytical database
+
+Prefer:
+
+**DuckDB**
+
+because:
+
+* application will initially run locally
+* excellent CSV/Parquet analytics
+* fast aggregations
+* no database server required
+* handles large datasets efficiently
+
+SQLite can be used for application metadata if required, but analytical data should preferably use DuckDB.
+
+Design the architecture so PostgreSQL can later replace DuckDB if the application becomes hosted/multi-user.
+
+---
+
+# 5. DATA INGESTION PIPELINE
+
+Create an ingestion engine that:
+
+1. scans configured data directories
+2. detects CSV/JSON files
+3. identifies dataset type
+4. validates schemas
+5. maps columns
+6. normalizes values
+7. cleans data
+8. deduplicates records
+9. stores normalized records
+10. calculates derived fields
+11. creates analytical tables/views
+12. records data source and ingestion timestamp
+
+Provide an **Import Data** screen.
+
+I should be able to drag/drop:
+
+```text
+transactions.csv
+rents.csv
+projects.csv
+```
+
+and the system should process them.
+
+Also support:
+
+**Import Folder**
+
+so I can select the scraper output directory.
+
+---
+
+# 6. NEVER SILENTLY LOSE DATA
+
+Raw imported data must remain recoverable.
+
+Maintain:
+
+```text
+raw data
+↓
+normalized data
+↓
+analytics
+```
+
+Every record should retain source lineage where practical.
+
+Example:
+
+```text
+source_file
+source_dataset
+import_date
+raw_identifier
+normalized_identifier
+```
+
+---
+
+# 7. ENTITY RESOLUTION
+
+This is EXTREMELY IMPORTANT.
+
+Different datasets may write the same project differently.
+
+Examples:
+
+```text
+AZIZI VENICE
+Azizi Venice
+Azizi Venice 15
+VENICE AZIZI
+Azizi Venice Tower 15
+```
+
+They may belong to the same master development but different buildings/towers.
+
+Similarly:
+
+```text
+JVC
+Jumeirah Village Circle
+Jumeirah Village Circle (JVC)
+```
+
+Build an entity resolution layer for:
+
+* areas
+* communities
+* sub-communities
+* developments
+* projects
+* towers/buildings
+* developers
+
+DO NOT blindly merge names.
+
+Create:
+
+```text
+canonical_name
+source_name
+alias
+entity_id
+confidence
+```
+
+Provide a UI where uncertain mappings can be manually reviewed.
+
+---
+
+# 8. IMPORTANT PROJECT HIERARCHY
+
+Model Dubai real estate approximately as:
+
+```text
+Dubai
+    ↓
+Area / Community
+    ↓
+Sub-community
+    ↓
+Development / Master Development
+    ↓
+Project
+    ↓
+Building / Tower
+    ↓
+Unit Type
+```
+
+Do not assume every source follows exactly this hierarchy.
+
+Support incomplete relationships.
+
+Example:
+
+```text
+Azizi Venice
+    Tower 1
+    Tower 2
+    Tower 15
+```
+
+I must be able to analyze:
+
+* whole Azizi Venice development
+* individual Azizi Venice towers
+
+without mixing the two incorrectly.
+
+---
+
+# 9. CORE APPLICATION NAVIGATION
+
+Create a proper left navigation.
+
+Sections:
+
+```text
+Overview
+
+Market Intelligence
+
+Sales
+Rentals
+Projects
+Buildings
+Communities
+Developers
+Unit Types
+Supply
+Construction
+
+Compare
+
+Opportunities
+Market Signals
+
+Map
+
+Data Explorer
+Import Data
+Data Quality
+
+Settings
+```
+
+NO CRM FEATURES.
+
+Do not add:
+
+* leads
+* calling
+* WhatsApp
+* customer pipelines
+* sales teams
+* commissions
+* tasks
+
+This application is DATA + ANALYTICS ONLY.
+
+---
+
+# 10. EXECUTIVE DASHBOARD
+
+The landing page should immediately tell me what is happening in the market.
+
+Top KPI cards:
+
+```text
+Total Sales
+Sales Value
+Average Sale Price
+Median Sale Price
+
+Average PSF
+
+Rental Contracts
+Average Annual Rent
+Median Rent
+
+Estimated Rental Yield
+
+Active Projects
+Projects Under Construction
+
+Known Residential Units
+Upcoming Supply
+```
+
+Allow periods:
+
+```text
+7D
+30D
+90D
+6M
+YTD
+Custom
+```
+
+Each KPI should show:
+
+```text
+current value
+previous-period value
+percentage change
+small sparkline
+```
+
+---
+
+# 11. MARKET PULSE
+
+Create a Market Pulse area.
+
+Show:
+
+### Fastest growing areas
+
+based on:
+
+* transaction growth
+* rental growth
+* PSF growth
+
+### Cooling areas
+
+based on decreasing:
+
+* transactions
+* rental contracts
+* prices
+
+### Hot projects
+
+projects experiencing unusually high transaction activity.
+
+### Rental hotspots
+
+locations experiencing unusually high rental demand.
+
+### Developer momentum
+
+developers gaining transaction market share.
+
+---
+
+# 12. SALES INTELLIGENCE PAGE
+
+Create a dedicated sales analytics page.
+
+Charts/tables:
+
+### Transaction volume over time
+
+Daily / weekly / monthly.
+
+### Transaction value over time
+
+### Average price
+
+### Median price
+
+### PSF trend
+
+### Transaction distribution by:
+
+* community
+* sub-community
+* development
+* building
+* developer
+* property type
+* bedroom
+* off-plan/ready
+
+### Top projects
+
+Table:
+
+```text
+Project
+Developer
+Area
+Transactions
+Sales Value
+Avg Price
+Median Price
+Avg PSF
+7D Change
+30D Change
+Market Share
+```
+
+Sortable and filterable.
+
+---
+
+# 13. RENTAL INTELLIGENCE
+
+This is particularly important.
+
+I need to understand exactly what people are renting.
+
+Show:
+
+### Rentals by area
+
+### Rentals by project
+
+### Rentals by building
+
+### Rentals by unit type
+
+Example:
+
+```text
+Studio
+1 Bedroom
+2 Bedroom
+3 Bedroom
+4+ Bedroom
+Villa
+Townhouse
+```
+
+Show both:
+
+```text
+number of contracts
+percentage of rental activity
+```
+
+---
+
+# 14. RENTAL DEMAND MATRIX
+
+Create an extremely useful visualization.
+
+Example:
+
+| Area     | Studio |       1BR |  2BR |    3BR |
+| -------- | -----: | --------: | ---: | -----: |
+| JVC      |   High | Very High | High | Medium |
+| Marina   | Medium |      High | High | Medium |
+| Downtown |    Low |      High | High | Medium |
+
+Underlying values should use actual contracts, not arbitrary labels.
+
+Allow switching between:
+
+```text
+Absolute rental contracts
+Market share
+Contracts per available unit
+Growth
+```
+
+---
+
+# 15. BEDROOM / UNIT TYPE INTELLIGENCE
+
+Dedicated page.
+
+For each bedroom/unit type calculate:
+
+```text
+Sales transactions
+Rental transactions
+Average price
+Median price
+PSF
+Average rent
+Median rent
+Estimated gross yield
+Transaction growth
+Rental growth
+Available/known supply
+```
+
+I want questions such as:
+
+> Are 1BR apartments more liquid than studios in JVC?
+
+to become visually obvious.
+
+---
+
+# 16. RENTAL YIELD
+
+Whenever sales and rental data can reasonably be joined:
+
+Calculate:
+
+```text
+Gross Yield =
+Annual Rent / Property Value × 100
+```
+
+Prefer medians when sample sizes permit.
+
+Show yield for:
+
+```text
+community
+project
+building
+bedroom
+property type
+```
+
+Clearly label these as **estimated gross yields**, not guaranteed investment returns.
+
+Show sample sizes used.
+
+---
+
+# 17. LIQUIDITY / MARKET DEPTH
+
+Create useful liquidity indicators.
+
+Possible measures:
+
+```text
+transaction count
+transaction frequency
+rental frequency
+market share
+consistency of transactions
+sales velocity
+```
+
+Create a normalized:
+
+**Liquidity Score**
+
+0–100.
+
+But ALWAYS allow me to inspect the underlying data.
+
+Never present a mystery score.
+
+Show exactly how every score is calculated.
+
+---
+
+# 18. SUPPLY INTELLIGENCE
+
+Use:
+
+```text
+unit_supply
+developments
+construction_history
+construction_milestones
+```
+
+to understand future supply.
+
+Show:
+
+```text
+existing known units
+units under construction
+expected completions
+new project pipeline
+```
+
+Break down by:
+
+* community
+* developer
+* project
+* unit configuration when available
+
+---
+
+# 19. SUPPLY VS DEMAND
+
+One of the most important modules.
+
+Compare:
+
+```text
+rental demand
+sales demand
+existing supply
+future supply
+```
+
+Identify situations like:
+
+### Strong Demand / Low Supply
+
+potentially attractive.
+
+### Strong Demand / High Incoming Supply
+
+possible oversupply risk.
+
+### Weak Demand / High Supply
+
+warning.
+
+### Rising Demand / Falling Supply
+
+potential opportunity.
+
+Build a 2×2 matrix visualization.
+
+---
+
+# 20. OVERSUPPLY RISK
+
+Calculate an understandable supply risk indicator.
+
+Inputs can include:
+
+```text
+upcoming units
+historical transaction demand
+historical rental demand
+existing unit inventory
+estimated absorption
+```
+
+Do NOT pretend the score is exact.
+
+Show:
+
+```text
+Low
+Moderate
+High
+Very High
+```
+
+and explain WHY.
+
+---
+
+# 21. PROJECT PAGE
+
+Every development/project should have its own intelligence page.
+
+Header:
+
+```text
+Project
+Developer
+Area
+Status
+Estimated Completion
+Construction %
+Total Units
+Buildings/Towers
+```
+
+Tabs:
+
+```text
+Overview
+Sales
+Rentals
+Units
+Supply
+Construction
+Amenities
+Nearby
+Documents
+Data
+```
+
+---
+
+# 22. PROJECT KPI CARDS
+
+Examples:
+
+```text
+Transactions
+Sales Value
+Avg Price
+Median Price
+Avg PSF
+
+Rental Contracts
+Avg Rent
+Estimated Yield
+
+Known Units
+Transactions / Unit
+
+Construction Progress
+```
+
+---
+
+# 23. BUILDING PAGE
+
+Buildings/towers need separate profiles.
+
+Show:
+
+```text
+Building
+Development
+Community
+Developer
+Floors
+Known Units
+Completion
+Construction status
+
+Sales activity
+Rental activity
+Bedroom distribution
+Price
+PSF
+Rent
+Yield
+```
+
+This is important because the same development may contain many towers.
+
+---
+
+# 24. COMMUNITY INTELLIGENCE PAGE
+
+Example:
+
+# Jumeirah Village Circle
+
+Show:
+
+```text
+Total projects
+Total buildings
+Known residential units
+
+Sales transactions
+Rental transactions
+
+Average PSF
+Median sales price
+Median rents
+Estimated yield
+
+Top developers
+Top projects
+Top buildings
+
+Most demanded bedroom type
+Upcoming supply
+```
+
+Charts should reveal the composition of that community.
+
+---
+
+# 25. DEVELOPER INTELLIGENCE
+
+Developer page:
+
+```text
+Projects
+Active construction
+Known units
+Transaction count
+Transaction value
+Average price
+Average PSF
+Market share
+Rental activity
+```
+
+Rank developers by:
+
+```text
+sales volume
+sales value
+units sold
+market share
+momentum
+```
+
+---
+
+# 26. PROJECT COMPARISON TOOL
+
+Create one of the main features:
+
+# COMPARE
+
+Allow me to select:
+
+2–5:
+
+* projects
+* buildings
+* communities
+* developers
+
+Compare side-by-side.
+
+Example:
+
+```text
+Azizi Venice
+vs
+Azizi Milan
+vs
+DAMAC Lagoons
+```
+
+Metrics:
+
+```text
+Location
+Developer
+Status
+Completion
+Units
+Upcoming supply
+
+Transaction volume
+Sales value
+Average price
+Median price
+PSF
+
+Rent
+Rental transactions
+Estimated yield
+
+Most demanded unit
+Transaction momentum
+Rental momentum
+Supply risk
+Liquidity
+```
+
+Use:
+
+* comparison cards
+* charts
+* radar charts only when genuinely useful
+* tables
+* trend lines
+
+Do not hide exact numbers behind visualizations.
+
+---
+
+# 27. AREA COMPARISON
+
+Allow comparisons such as:
+
+```text
+JVC
+Dubai Marina
+Business Bay
+Downtown
+Dubai South
+```
+
+across:
+
+```text
+price
+PSF
+rent
+yield
+sales activity
+rental activity
+unit demand
+future supply
+developer concentration
+```
+
+---
+
+# 28. TIME COMPARISON
+
+Every major chart should support:
+
+```text
+previous week
+previous month
+previous quarter
+previous 6 months
+custom period
+```
+
+Example:
+
+> Compare July vs August.
+
+or:
+
+> Current 30 days vs previous 30 days.
+
+---
+
+# 29. MARKET SHARE
+
+Show market share for:
+
+```text
+developers
+projects
+communities
+bedroom types
+property types
+```
+
+By both:
+
+```text
+number of transactions
+transaction value
+```
+
+---
+
+# 30. MOMENTUM ENGINE
+
+Create momentum calculations.
+
+For example:
+
+```text
+7D
+30D
+90D
+```
+
+Compare activity against previous equivalent periods.
+
+Display:
+
+```text
+↑ accelerating
+→ stable
+↓ slowing
+```
+
+Use statistical guardrails.
+
+If there are too few observations, say:
+
+**Insufficient Data**
+
+rather than making a misleading conclusion.
+
+---
+
+# 31. OPPORTUNITY FINDER
+
+Create a page called:
+
+# Opportunities
+
+This should surface data-driven patterns.
+
+Examples:
+
+### High Yield + High Rental Demand
+
+### Rising Sales + Limited Supply
+
+### Rental Growth > Price Growth
+
+### Undervalued relative to nearby areas
+
+### Strong rental market but weak transaction pricing
+
+### High developer momentum
+
+### Demand rising faster than incoming supply
+
+Each opportunity should show:
+
+```text
+WHY IT WAS FLAGGED
+```
+
+with actual statistics.
+
+---
+
+# 32. MARKET SIGNALS
+
+Generate human-readable observations automatically.
+
+Examples:
+
+> 1-bedroom apartments accounted for 47% of rental contracts in JVC over the last 90 days.
+
+> Rental activity in Dubai South increased 23% compared with the previous 90-day period.
+
+> Project X recorded 84 transactions this month, 2.1× its six-month monthly average.
+
+> Average rent for 2BR apartments in Area X rose 8.4% while transaction PSF remained broadly unchanged.
+
+> Area Y has 4,800 units scheduled for future delivery relative to only 620 observed annualized rental contracts.
+
+Every insight MUST link back to the data used to calculate it.
+
+Do not use an LLM to invent these observations.
+
+Calculate first, then generate text from deterministic results.
+
+---
+
+# 33. DECISION ENGINE
+
+Create a page where I can specify an investment profile.
+
+Inputs:
+
+```text
+Budget
+Preferred areas
+Property type
+Bedrooms
+
+Ready / Off-plan / Either
+
+Priority:
+- Rental income
+- Capital appreciation proxy
+- Liquidity
+- Balanced
+
+Risk tolerance
+```
+
+Return ranked:
+
+```text
+communities
+projects
+unit types
+```
+
+based on data available.
+
+The result must explain:
+
+```text
+Why this ranked highly
+What the risks are
+What data is missing
+```
+
+Do NOT call it financial advice.
+
+---
+
+# 34. ASK THE DATA
+
+Create an optional natural-language analytics interface.
+
+Examples:
+
+```text
+Which area had the most 1BR rentals this month?
+
+Show me the top 10 projects by transactions in JVC.
+
+Which apartment type has the highest estimated yield in Business Bay?
+
+Compare rental demand in Dubai Marina and JVC.
+
+Which developers gained market share over the last 90 days?
+
+Show buildings with high rental demand but relatively low transaction PSF.
+```
+
+IMPORTANT:
+
+The underlying query should operate against our normalized database.
+
+If no external LLM/API key exists, create a structured local query-builder experience instead.
+
+The rest of the application must NOT depend on paid AI APIs.
+
+---
+
+# 35. DATA EXPLORER
+
+Provide an advanced spreadsheet-style explorer.
+
+Allow:
+
+```text
+filter
+sort
+search
+group
+aggregate
+select columns
+download CSV
+```
+
+I should be able to inspect the records behind any visualization.
+
+Clicking a chart element should preferably drill down to the underlying data.
+
+---
+
+# 36. GLOBAL FILTER BAR
+
+Have a persistent filtering system.
+
+Filters:
+
+```text
+Date Range
+Area
+Sub-community
+Development
+Building
+Developer
+Property Type
+Bedrooms
+Ready / Off-plan
+Transaction Type
+Rental New / Renewal
+Price Range
+PSF Range
+```
+
+Filters should propagate across relevant dashboards.
+
+---
+
+# 37. MAP
+
+Use free/open mapping technology.
+
+Use:
+
+**Leaflet + OpenStreetMap**
+
+or the map infrastructure already available in the project.
+
+Do NOT introduce a paid map API as a mandatory dependency.
+
+Map layers:
+
+```text
+communities
+projects
+buildings
+transaction activity
+rental activity
+price per sqft
+rental yield
+future supply
+construction projects
+```
+
+Support:
+
+```text
+markers
+clusters
+heatmaps
+choropleth where boundaries exist
+```
+
+Clicking a project should open its intelligence profile.
+
+---
+
+# 38. GEOGRAPHICAL ANALYSIS
+
+If coordinates are available, support nearby analysis.
+
+Examples:
+
+```text
+projects within 1 km
+schools within 2 km
+amenities
+metro stations
+major landmarks
+```
+
+Use the scraper's amenities/schools datasets.
+
+Do not fabricate travel times without routing data.
+
+---
+
+# 39. CONSTRUCTION INTELLIGENCE
+
+Use construction data to show:
+
+```text
+construction progress
+milestone history
+progress over time
+expected completion
+recent progress
+stalled projects
+```
+
+Where enough historical observations exist, identify:
+
+```text
+fast progress
+normal progress
+slow progress
+possibly stalled
+```
+
+Always show underlying dates/progress observations.
+
+---
+
+# 40. DATA QUALITY CENTER
+
+Create a page called:
+
+# Data Quality
+
+Show:
+
+```text
+records imported
+records rejected
+duplicates
+missing project names
+missing coordinates
+unknown developers
+unmatched buildings
+unmatched communities
+invalid dates
+invalid prices
+outliers
+```
+
+Allow manual correction of entity mappings.
+
+This page is essential.
+
+---
+
+# 41. SAMPLE SIZE & CONFIDENCE
+
+Never make strong conclusions from tiny samples.
+
+For calculated analytics display:
+
+```text
+Sample size: 438 transactions
+```
+
+where appropriate.
+
+For small samples show:
+
+```text
+Low confidence
+```
+
+or:
+
+```text
+Insufficient Data
+```
+
+---
+
+# 42. OUTLIER HANDLING
+
+Detect extreme:
+
+```text
+sale prices
+PSF
+rents
+sizes
+```
+
+Do not silently delete them.
+
+Flag them.
+
+Allow analytics to optionally exclude detected outliers.
+
+---
+
+# 43. UI DESIGN
+
+I want the application to look like a serious premium real-estate intelligence product.
+
+Use a **dark brown / chocolate / espresso visual language**, NOT bright orange.
+
+Suggested palette direction:
+
+```text
+background: near-black espresso
+surfaces: dark chocolate brown
+secondary surfaces: muted warm brown
+borders: subtle taupe/brown
+primary text: warm off-white
+secondary text: muted beige/stone
+positive: muted green
+negative: muted red
+warning: amber
+```
+
+Avoid gimmicky gradients everywhere.
+
+Make it:
+
+* sophisticated
+* dense but readable
+* desktop-first
+* premium
+* professional
+* data-rich
+* clean
+
+Think:
+
+```text
+Bloomberg intelligence
+×
+premium Dubai property portal
+×
+modern analytics software
+```
+
+---
+
+# 44. UI COMPONENTS
+
+Build reusable:
+
+```text
+KpiCard
+TrendCard
+ChartCard
+FilterBar
+DateRangePicker
+DataTable
+EntityPicker
+ComparisonSelector
+InsightCard
+SignalBadge
+ConfidenceBadge
+MetricTooltip
+MapPanel
+EntityHeader
+Breadcrumbs
+Drawer
+Modal
+EmptyState
+ErrorState
+LoadingSkeleton
+```
+
+---
+
+# 45. CHARTING
+
+Use a mature charting library.
+
+Prefer:
+
+**Apache ECharts**
+
+because the app needs sophisticated analytical charts.
+
+Use charts such as:
+
+```text
+line
+bar
+stacked bar
+area
+scatter
+bubble
+heatmap
+treemap
+histogram
+box plot
+waterfall when relevant
+```
+
+Do NOT use pie charts everywhere.
+
+---
+
+# 46. TOOLTIP DEFINITIONS
+
+Every unusual metric should have an explanation.
+
+For example:
+
+**Sales Velocity**
+
+> Number of registered sale transactions over the selected time period relative to historical activity.
+
+**Estimated Gross Yield**
+
+> Median annual rent divided by median property transaction value for comparable units.
+
+This makes the application understandable without needing technical knowledge.
+
+---
+
+# 47. RESPONSIVENESS
+
+Primary target:
+
+```text
+Desktop / Laptop
+```
+
+because this is a professional analytics tool.
+
+Tablet should work reasonably.
+
+Mobile support is secondary.
+
+---
+
+# 48. PERFORMANCE
+
+The application may eventually handle hundreds of thousands or millions of rows.
+
+Therefore:
+
+* never load entire datasets into browser memory
+* perform aggregation server-side
+* use DuckDB efficiently
+* paginate tables
+* virtualize large tables
+* cache expensive aggregations
+* index where appropriate
+* lazy-load screens
+* debounce filters/search
+
+---
+
+# 49. RECOMMENDED STACK
+
+Use:
+
+### Frontend
+
+```text
+React
+TypeScript
+Vite
+Tailwind CSS
+shadcn/ui or similarly high-quality primitives
+Apache ECharts
+TanStack Table
+TanStack Query
+Leaflet
+```
+
+### Backend
+
+Prefer:
+
+```text
+Python
+FastAPI
+DuckDB
+Pandas/Polars where appropriate
+Pydantic
+```
+
+Polars is preferred over Pandas for heavy dataframe work where beneficial.
+
+Keep frontend/backend types and API contracts clean.
+
+---
+
+# 50. LOCAL-FIRST
+
+Initially the application should run completely on my computer.
+
+Provide a simple command such as:
+
+```bash
+npm run dev
+```
+
+for development.
+
+And ideally:
+
+```bash
+npm run app
+```
+
+which starts everything required.
+
+Create scripts to launch:
+
+```text
+frontend
+backend
+database initialization
+```
+
+together.
+
+No cloud infrastructure should be required.
+
+---
+
+# 51. DATA FOLDER WATCHING
+
+Allow configuring:
+
+```text
+/data/scraped
+/data/dld
+```
+
+The application should detect newer files.
+
+Provide:
+
+**Refresh Data**
+
+which imports any new/modified datasets.
+
+Later this can be automated.
+
+---
+
+# 52. FILE HASHING
+
+Track imported files using:
+
+```text
+file path
+filename
+file hash
+modified timestamp
+import timestamp
+```
+
+Do not re-import the exact same file unnecessarily.
+
+---
+
+# 53. DERIVED ANALYTICAL TABLES
+
+Create appropriate analytical views/materialized tables such as:
+
+```text
+sales_daily
+sales_weekly
+sales_monthly
+
+rentals_daily
+rentals_weekly
+rentals_monthly
+
+project_sales_metrics
+project_rental_metrics
+
+building_metrics
+
+community_metrics
+
+developer_metrics
+
+unit_type_metrics
+
+price_psf_trends
+
+rental_trends
+
+supply_metrics
+
+demand_metrics
+
+yield_metrics
+```
+
+Do not necessarily use these exact names if a better schema is appropriate.
+
+---
+
+# 54. DATA DICTIONARY
+
+Generate documentation describing:
+
+```text
+every canonical field
+meaning
+source
+datatype
+transformations
+```
+
+Store this inside the repository.
+
+---
+
+# 55. CALCULATION DEFINITIONS
+
+Create:
+
+```text
+docs/METRICS.md
+```
+
+Document every derived metric:
+
+```text
+yield
+momentum
+liquidity
+sales velocity
+rental velocity
+market share
+supply risk
+demand score
+```
+
+Include exact formulas.
+
+---
+
+# 56. PROJECT STRUCTURE
+
+Keep the repository organized.
+
+Example:
+
+```text
+/apps
+    /web
+    /api
+
+/data
+    /raw
+    /processed
+    /database
+
+/packages
+    /ui
+    /analytics
+    /types
+
+/scripts
+    import_data
+    refresh_data
+    seed
+
+/docs
+    DATA_MODEL.md
+    METRICS.md
+    INGESTION.md
+    ARCHITECTURE.md
+```
+
+You may adjust this if the current repository already has a suitable structure.
+
+Do NOT unnecessarily rewrite functioning existing code.
+
+---
+
+# 57. EXISTING SCRAPER
+
+The scraper should remain responsible for COLLECTION.
+
+The intelligence application should be responsible for:
+
+```text
+ingestion
+cleaning
+normalization
+storage
+analytics
+visualization
+decision support
+```
+
+Maintain separation between those responsibilities.
+
+---
+
+# 58. AUTOMATIC SCRAPER INTEGRATION
+
+If the existing scraper has a known output directory:
+
+detect it automatically.
+
+The desired workflow should eventually be:
+
+```text
+Run scraper
+↓
+New files generated
+↓
+Open Real Estate Intelligence app
+↓
+Refresh Data
+↓
+Database updates
+↓
+Dashboards update
+```
+
+I should NOT manually edit CSVs.
+
+---
+
+# 59. ERROR HANDLING
+
+A bad dataset should not crash the whole application.
+
+Show useful errors such as:
+
+```text
+37 rows rejected because transaction_date could not be parsed.
+
+182 project names could not be matched.
+
+Column "bedrooms" was not found; bedroom analytics unavailable for this dataset.
+```
+
+---
+
+# 60. EMPTY DATA
+
+Some of the scraper files may currently contain very little data.
+
+For example unit_supply may initially be empty.
+
+The application must gracefully handle this.
+
+Show:
+
+```text
+No unit supply data currently available.
+```
+
+Do not generate fake demo numbers in production views.
+
+---
+
+# 61. NO FAKE DATA
+
+Mock data may temporarily be used during component development.
+
+However:
+
+Before declaring the application complete:
+
+REMOVE MOCK ANALYTICAL RESULTS.
+
+Anything displayed as a market statistic must originate from imported datasets.
+
+---
+
+# 62. NUMBER FORMATTING
+
+Use Dubai appropriate formatting.
+
+Examples:
+
+```text
+AED 1.28M
+AED 850K
+AED 1,740 / sqft
+7.2%
+1,438 transactions
+```
+
+Allow displaying INR conversion later, but AED remains canonical.
+
+---
+
+# 63. SAVED VIEWS
+
+Allow me to save analytical filter combinations.
+
+Examples:
+
+```text
+JVC — 1BR Rental Market
+
+Dubai South — Off-plan
+
+Azizi Projects
+
+Top Rental Yield Areas
+```
+
+No user account needed locally.
+
+Store saved views locally.
+
+---
+
+# 64. EXPORT
+
+Allow exporting:
+
+```text
+tables → CSV
+charts → PNG
+analysis view → PDF later
+```
+
+CSV export is priority.
+
+---
+
+# 65. SEARCH
+
+Create global search.
+
+Searching:
+
+```text
+Azizi Venice
+```
+
+should surface:
+
+```text
+development
+towers
+developer
+community
+related analytics
+```
+
+---
+
+# 66. COMMAND PALETTE
+
+Implement:
+
+```text
+Ctrl/Cmd + K
+```
+
+for quick navigation/search.
+
+Example:
+
+```text
+Open JVC
+Compare projects
+Import data
+Open rental intelligence
+```
+
+---
+
+# 67. HOME SCREEN SHOULD ANSWER 5 QUESTIONS
+
+Within approximately 30 seconds of opening the application I should understand:
+
+1. What is selling?
+2. What is renting?
+3. What is getting more expensive?
+4. Where is supply coming?
+5. Where are the interesting opportunities/risks?
+
+If the dashboard cannot answer those questions, it is not finished.
+
+---
+
+# 68. BROKER-SPECIFIC INSIGHT
+
+Remember the actual user is a Dubai real-estate broker.
+
+The system needs to make it easier to say to a client:
+
+> "1BRs in this community represent X% of rental demand."
+
+or:
+
+> "This development registered X sales over the last 90 days compared with Y for its competitor."
+
+or:
+
+> "This area has approximately X upcoming units versus Y observed rental contracts."
+
+Numbers should be usable in client conversations.
+
+---
+
+# 69. DO NOT CONFUSE CORRELATION WITH FORECASTING
+
+Do not make claims like:
+
+```text
+Area X will appreciate by 20%.
+```
+
+Instead:
+
+```text
+Area X has experienced rising transaction prices, increasing sales activity and comparatively constrained observed supply.
+```
+
+The application should distinguish:
+
+```text
+Historical fact
+Derived indicator
+Forecast / assumption
+```
+
+---
+
+# 70. PHASE ZERO — INSPECT FIRST
+
+Before changing code:
+
+1. Inspect the entire repository.
+2. Identify existing scraper code.
+3. Identify datasets and schemas.
+4. Sample every CSV and JSON.
+5. Determine relationships.
+6. Find duplicate data between CSV and JSON.
+7. Identify the most reliable version of every dataset.
+8. Inspect existing UI/map code if present.
+9. Preserve useful existing functionality.
+10. Design the data model.
+
+Do not ask me to manually explain things the repository itself can tell you.
+
+---
+
+# 71. THEN BUILD THE APPLICATION
+
+Do not stop after writing an architecture document.
+
+Actually implement:
+
+```text
+database
+ingestion
+API
+analytics
+frontend
+charts
+tables
+filters
+comparison
+project profiles
+community profiles
+building profiles
+rental intelligence
+sales intelligence
+data quality
+map
+```
+
+---
+
+# 72. IMPLEMENTATION STYLE
+
+You are authorized to:
+
+* inspect all project files
+* create files
+* edit files
+* install appropriate dependencies
+* create databases
+* run migrations
+* run scripts
+* run tests
+* run development servers
+* fix lint/type errors
+* refactor where necessary
+
+Do not repeatedly ask me for permission for normal development operations.
+
+Do NOT:
+
+* delete source datasets
+* remove working scraper functionality
+* expose secrets
+* modify files outside the project directory
+* execute destructive system commands
+
+---
+
+# 73. WORK AUTONOMOUSLY
+
+Do not come back to me after each small step.
+
+Complete as much of the system as technically possible.
+
+If something cannot be implemented because data is absent:
+
+1. implement the architecture
+2. make the UI handle the missing state
+3. document the missing dataset
+4. continue with everything else
+
+---
+
+# 74. TESTING
+
+Create tests for critical analytics.
+
+Especially:
+
+```text
+entity resolution
+transaction aggregation
+rental aggregation
+PSF
+yield
+period comparison
+market share
+deduplication
+date parsing
+bedroom normalization
+```
+
+Financial calculations must not silently be wrong.
+
+---
+
+# 75. DATA VALIDATION
+
+Check relationships such as:
+
+```text
+sale price > 0
+rent > 0
+area > 0
+PSF = sale_price / sqft approximately
+```
+
+Flag inconsistencies.
+
+---
+
+# 76. BEDROOM NORMALIZATION
+
+Normalize examples like:
+
+```text
+Studio
+ST
+0
+0BR
+Studio Apartment
+```
+
+→
+
+```text
+Studio
+```
+
+Likewise normalize:
+
+```text
+1 Bedroom
+1BR
+1 Bed
+One Bedroom
+```
+
+→
+
+```text
+1BR
+```
+
+Do the same for other configurations.
+
+---
+
+# 77. PROPERTY TYPE NORMALIZATION
+
+Normalize:
+
+```text
+Apartment
+Flat
+Residential Unit
+```
+
+where appropriate.
+
+But preserve raw source values.
+
+---
+
+# 78. DATE NORMALIZATION
+
+Support various incoming date formats.
+
+Store normalized dates consistently.
+
+All period calculations must use actual date fields rather than file timestamps.
+
+---
+
+# 79. FINAL EXPERIENCE
+
+The target experience should be:
+
+I open the application.
+
+I see:
+
+> Dubai Residential Market — Last 30 Days
+
+Immediately:
+
+```text
+12,482 Sales
+AED 34.2B Value
++8.3% vs previous 30 days
+
+18,934 Rental Contracts
++12.1%
+
+Best-selling unit: 1BR
+Highest rental activity: JVC
+Highest transaction growth: ...
+Largest incoming supply: ...
+```
+
+I click JVC.
+
+I see:
+
+```text
+JVC Overview
+
+Sales
+Rentals
+Unit Mix
+Prices
+PSF
+Yield
+Supply
+Projects
+Buildings
+Developers
+```
+
+I click:
+
+```text
+1BR
+```
+
+and immediately understand:
+
+```text
+number rented
+number sold
+median rent
+median price
+yield
+top buildings
+trend
+supply
+```
+
+Then I select:
+
+```text
+JVC
+vs
+Business Bay
+vs
+Dubai Marina
+```
+
+and receive a proper side-by-side investment comparison.
+
+That is the standard expected from this application.
+
+---
+
+# 80. MOST IMPORTANT RULE
+
+Do not optimize for:
+
+> "How many dashboards can we create?"
+
+Optimize for:
+
+> **"Can this data tell a Dubai real-estate broker what is actually happening and help him make a better decision?"**
+
+If a visualization does not help answer a useful question, do not include it.
+
+If the raw dataset contains information that can produce a useful insight that has not been mentioned in this prompt, implement it.
+
+Treat the datasets as an analytical system, not merely files to display.
+
+Start by inspecting the repository and existing datasets, write down the discovered schema/data relationships, then immediately proceed with implementation.

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Developments - Propsearch Dashboard{% endblock %}
+{% block content %}
+<h1>Developments</h1>
+
+<form class="filters" method="get">
+    <input type="text" name="search" placeholder="Search by name..." value="{{ filters.search or '' }}">
+    <select name="area_id">
+        <option value="">All areas</option>
+        {% for a in areas %}
+        <option value="{{ a.id }}" {% if filters.area_id == a.id %}selected{% endif %}>{{ a.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="developer_id">
+        <option value="">All developers</option>
+        {% for d in developers %}
+        <option value="{{ d.id }}" {% if filters.developer_id == d.id %}selected{% endif %}>{{ d.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="status">
+        <option value="">All statuses</option>
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if filters.status == s %}selected{% endif %}>{{ s.replace('_',' ') }}</option>
+        {% endfor %}
+    </select>
+    <select name="dev_type">
+        <option value="">All types</option>
+        {% for t in dev_types %}
+        <option value="{{ t }}" {% if filters.dev_type == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+    </select>
+    <input type="text" name="completion_year" placeholder="Completion year" value="{{ filters.completion_year or '' }}" style="width:120px;">
+    <button type="submit">Filter</button>
+    <a href="/developments" style="align-self:center;">Clear</a>
+</form>
+
+<p class="muted">{{ total }} development(s) match{% if total > 0 %}, showing page {{ page }} of {{ total_pages }}{% endif %}</p>
+
+{% if developments %}
+<table>
+    <tr><th>Name</th><th>Area</th><th>Developer</th><th>Status</th><th>Type</th><th>Total units</th></tr>
+    {% for d in developments %}
+    <tr>
+        <td><a href="/developments/{{ d.id }}">{{ d.name }}</a></td>
+        <td class="muted">{{ d.area_name or '—' }}</td>
+        <td class="muted">{{ d.developer_name or '—' }}</td>
+        <td><span class="badge badge-{{ d.normalized_status }}">{{ d.raw_status or 'unknown' }}</span></td>
+        <td class="muted">{{ d.building_type_raw or '—' }}</td>
+        <td>{{ d.total_units if d.total_units is not none else 'UNKNOWN' }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="pagination">
+    {% if page > 1 %}<a href="?{{ querystring }}&page={{ page - 1 }}">&larr; Prev</a>{% endif %}
+    <span class="muted">Page {{ page }} / {{ total_pages }}</span>
+    {% if page < total_pages %}<a href="?{{ querystring }}&page={{ page + 1 }}">Next &rarr;</a>{% endif %}
+</div>
+{% else %}
+<div class="card empty-state">No developments match these filters.</div>
+{% endif %}
+{% endblock %}
