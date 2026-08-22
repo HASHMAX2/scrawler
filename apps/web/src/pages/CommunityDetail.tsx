@@ -39,6 +39,11 @@ export function CommunityDetail() {
           <h1 className="text-lg font-semibold">{data.community_name}</h1>
           {profile?.also_known_as && <span className="text-xs text-[var(--text-muted)]">({profile.also_known_as})</span>}
           {!data.has_scraped_profile && <SignalBadge tone="neutral">No scraped profile — DLD data only</SignalBadge>}
+          {data.has_scraped_profile && data.community_key.startsWith("s") && (
+            <Link to={`/areas/${data.community_key.slice(1)}`}>
+              <SignalBadge tone="good">Browse sub-areas &rarr;</SignalBadge>
+            </Link>
+          )}
         </div>
         {profile?.description && <p className="text-xs text-[var(--text-muted)] mt-1 max-w-2xl">{profile.description}</p>}
       </div>
