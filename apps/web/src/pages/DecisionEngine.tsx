@@ -77,7 +77,7 @@ export function DecisionEngine() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold">Decision Engine</h1>
+        <h1 className="text-xl font-semibold">Decision Engine</h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">
           Set an investment profile below and get communities ranked by a transparent, deterministic score. This is not financial advice — every
           score component, weight, and data gap is shown so you can judge the ranking yourself.

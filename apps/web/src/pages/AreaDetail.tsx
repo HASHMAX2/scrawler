@@ -44,7 +44,7 @@ export function AreaDetail() {
         )}
 
         <div className="flex items-center gap-2 mt-2 flex-wrap">
-          <h1 className="text-lg font-semibold">{data.name}</h1>
+          <h1 className="text-xl font-semibold">{data.name}</h1>
           {data.profile?.also_known_as && <span className="text-xs text-[var(--text-muted)]">({data.profile.also_known_as})</span>}
           {!data.has_dld_link && <SignalBadge tone="neutral">No direct DLD match at this grain</SignalBadge>}
           {hasOwnActivity && (

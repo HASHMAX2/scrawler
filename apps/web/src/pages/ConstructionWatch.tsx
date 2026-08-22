@@ -22,7 +22,7 @@ export function ConstructionWatch() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold">Construction Watch</h1>
+        <h1 className="text-xl font-semibold">Construction Watch</h1>
         <p className="text-xs text-[var(--text-muted)]">
           Field-level changes detected across Propsearch re-crawls: status flips, completion-date slips, and unit-count revisions. This is a diff feed off
           the scraper's own history — not DLD data.

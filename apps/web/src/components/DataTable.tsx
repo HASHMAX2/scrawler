@@ -25,7 +25,7 @@ export function DataTable<T>({ columns, rows, onRowClick }: { columns: Column<T>
             <tr
               key={i}
               onClick={() => onRowClick?.(row)}
-              className={`border-b border-[var(--border)]/50 ${onRowClick ? "cursor-pointer hover:bg-[var(--surface-2)]" : ""}`}
+              className={`border-b border-[var(--border)]/50 transition-colors duration-300 ease-out hover:bg-[var(--accent-soft)] ${onRowClick ? "cursor-pointer" : ""}`}
             >
               {columns.map((c) => (
                 <td key={c.key} className={`py-2 px-3 ${c.align === "right" ? "text-right" : "text-left"}`}>

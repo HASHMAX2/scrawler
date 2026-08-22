@@ -37,7 +37,7 @@ export function Overview() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold">Dubai Residential Market — Last {data.period}</h1>
+        <h1 className="text-xl font-semibold">Dubai Residential Market — Last {data.period}</h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">
           {data.current_range[0]} to {data.current_range[1]} · data covers {data.data_range[0]} to {data.data_range[1]}
         </p>

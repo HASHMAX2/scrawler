@@ -36,7 +36,7 @@ export function CommunityDetail() {
           </div>
         )}
         <div className="flex items-center gap-2 mt-2">
-          <h1 className="text-lg font-semibold">{data.community_name}</h1>
+          <h1 className="text-xl font-semibold">{data.community_name}</h1>
           {profile?.also_known_as && <span className="text-xs text-[var(--text-muted)]">({profile.also_known_as})</span>}
           {!data.has_scraped_profile && <SignalBadge tone="neutral">No scraped profile — DLD data only</SignalBadge>}
           {data.has_scraped_profile && data.community_key.startsWith("s") && (

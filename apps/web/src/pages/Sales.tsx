@@ -52,7 +52,7 @@ export function Sales() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold">Sales Intelligence</h1>
+      <h1 className="text-xl font-semibold">Sales Intelligence</h1>
       <ChartCard title="Transaction Volume & PSF Trend (weekly)" option={trendOption} height={320} />
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">

@@ -1,29 +1,47 @@
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api, type AreaListItem } from "../lib/api";
 import { useFilters } from "../state/FilterContext";
-import { Card, ErrorState, LoadingSkeleton } from "../components/ui";
+import { Card, EmptyState, ErrorState, LoadingSkeleton } from "../components/ui";
 import { formatAed, formatPct, onHeroImageError, upgradeToXlImage } from "../lib/format";
 
 export function Areas() {
   const { period } = useFilters();
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
   const { data, isLoading, error } = useQuery({ queryKey: ["areas", period], queryFn: () => api.areas(period) });
+
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    const q = search.trim().toLowerCase();
+    if (!q) return data.items;
+    return data.items.filter((a) => a.name.toLowerCase().includes(q) || a.also_known_as?.toLowerCase().includes(q));
+  }, [data, search]);
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold">Areas</h1>
-        <p className="text-xs text-[var(--text-muted)]">
-          {data ? `${data.items.length} Dubai areas` : "Loading..."} — each rolls up DLD sales/rental activity across all of its sub-communities.
-          Click into an area to browse its sub-areas.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-semibold">Areas</h1>
+          <p className="text-sm text-[var(--text-muted)] mt-0.5">
+            {data ? `${data.items.length} Dubai areas` : "Loading..."} — each rolls up DLD sales/rental activity across all of its sub-communities.
+            Click into an area to browse its sub-areas.
+          </p>
+        </div>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search area..."
+          className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--accent)] w-56"
+        />
       </div>
       {isLoading && <LoadingSkeleton rows={8} />}
       {error && <ErrorState message={(error as Error).message} />}
-      {data && (
+      {data && filtered.length === 0 && <EmptyState title="No areas match your search" detail={`No area name or alias matches "${search}".`} />}
+      {data && filtered.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.items.map((a) => (
+          {filtered.map((a) => (
             <AreaCard key={a.area_id} area={a} onClick={() => navigate(`/areas/${a.area_id}`)} />
           ))}
         </div>

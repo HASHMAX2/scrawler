@@ -36,7 +36,7 @@ export function Projects() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Projects</h1>
+        <h1 className="text-xl font-semibold">Projects</h1>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}

@@ -44,6 +44,10 @@ export interface IntelEdge {
 export interface GraphSlice {
   nodes: IntelNode[];
   edges: IntelEdge[];
+  /** Set when the slice is a capped top-N of a larger real set (progressive
+   * disclosure, not the full count) — lets the UI say "Top 14 of 92" rather
+   * than silently showing a partial list. */
+  totalAvailable?: number;
 }
 
 const DUBAI_ID = "market:dubai";
@@ -191,9 +195,9 @@ function edgesFor(parentId: string, nodes: IntelNode[], period: string): IntelEd
 export async function fetchChildren(node: IntelNode, period: string): Promise<GraphSlice> {
   if (node.fetchKey === "root") {
     const res = await api.areas(period);
-    const top = [...res.items].sort((a, b) => b.sales_count + b.rental_count - (a.sales_count + a.rental_count)).slice(0, 10);
+    const top = [...res.items].sort((a, b) => b.sales_count + b.rental_count - (a.sales_count + a.rental_count)).slice(0, 14);
     const nodes = top.map((a) => areaNode(a, node.id));
-    return { nodes, edges: edgesFor(node.id, nodes, period) };
+    return { nodes, edges: edgesFor(node.id, nodes, period), totalAvailable: res.items.length };
   }
 
   if (node.fetchKey.startsWith("area:")) {

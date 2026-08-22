@@ -29,13 +29,15 @@
   --violet: #9b7bff;
   --violet-soft: rgba(155, 123, 255, 0.14);
 
-  /* Intelligence graph node categories */
-  --node-market: #4b9bff;
-  --node-area: #37d4c5;
-  --node-project: #ffbd59;
-  --node-developer: #9b7bff;
-  --node-infra: #7fc8c0;
-  --node-unittype: #7aa7e0;
+  /* Intelligence graph node categories — deliberately desaturated relative
+     to a typical "neon" data-viz palette, so the graph reads as analytical
+     software rather than a game HUD. */
+  --node-market: #6e93d6;
+  --node-area: #4fada3;
+  --node-project: #cf9d55;
+  --node-developer: #8b7fc7;
+  --node-infra: #6fb3ac;
+  --node-unittype: #7590b8;
   --node-opportunity: #42d69a;
   --node-risk: #f2766d;
 
@@ -64,43 +66,22 @@
   --violet: #7c3aed;
   --violet-soft: rgba(124, 58, 237, 0.1);
 
-  --node-market: #1769e0;
-  --node-area: #11afa0;
-  --node-project: #f4b740;
-  --node-developer: #7c3aed;
-  --node-infra: #5fb8ae;
-  --node-unittype: #3f7dc9;
+  --node-market: #3d6dc4;
+  --node-area: #1c9187;
+  --node-project: #b9863f;
+  --node-developer: #6c4fd6;
+  --node-infra: #4a998f;
+  --node-unittype: #4f74a8;
   --node-opportunity: #0b9b7a;
   --node-risk: #e6685c;
 }
 
-/* Intelligence Map forces the cinematic palette regardless of the
-   document theme — it's the flagship experience and reads correctly
-   only against a dark, atmospheric canvas. */
+/* Intelligence Map follows the document's light/dark theme like the rest
+   of the app (no forced palette) — it just adds a subtle atmospheric
+   backdrop appropriate to whichever theme is active, so the graph still
+   reads as a distinct "space" without breaking day/night consistency. */
 .intel-scope {
-  --bg: #08111a;
-  --surface: #0d1721;
-  --surface-2: #121e29;
-  --surface-3: #172633;
-  --border: #21303d;
-  --text: #f2f6fa;
-  --text-muted: #8291a1;
-  --hover-overlay: rgba(242, 246, 250, 0.05);
-  --accent: #4b9bff;
-  --accent-soft: rgba(75, 155, 255, 0.14);
-  --good: #42d69a;
-  --bad: #f2766d;
-  --warn: #ffbd59;
-  --violet: #9b7bff;
-  --node-market: #4b9bff;
-  --node-area: #37d4c5;
-  --node-project: #ffbd59;
-  --node-developer: #9b7bff;
-  --node-infra: #7fc8c0;
-  --node-unittype: #7aa7e0;
-  --node-opportunity: #42d69a;
-  --node-risk: #f2766d;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, #101e2c 0%, #08111a 60%);
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--accent) 6%, var(--bg)) 0%, var(--bg) 60%);
   color: var(--text);
 }
 
@@ -143,10 +124,10 @@ table {
   border-radius: 6px;
 }
 
-/* Reusable glow utilities for the Intelligence Map */
-.glow-accent { box-shadow: 0 0 0 1px rgba(75, 155, 255, 0.35), 0 0 24px 2px rgba(75, 155, 255, 0.25); }
-.glow-opportunity { box-shadow: 0 0 0 1px rgba(66, 214, 154, 0.35), 0 0 24px 2px rgba(66, 214, 154, 0.25); }
-.glow-risk { box-shadow: 0 0 0 1px rgba(242, 118, 109, 0.35), 0 0 24px 2px rgba(242, 118, 109, 0.25); }
+/* Reusable glow utilities for the Intelligence Map — restrained, not neon */
+.glow-accent { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent), 0 0 14px 1px color-mix(in srgb, var(--accent) 18%, transparent); }
+.glow-opportunity { box-shadow: 0 0 0 1px color-mix(in srgb, var(--good) 45%, transparent), 0 0 14px 1px color-mix(in srgb, var(--good) 18%, transparent); }
+.glow-risk { box-shadow: 0 0 0 1px color-mix(in srgb, var(--bad) 45%, transparent), 0 0 14px 1px color-mix(in srgb, var(--bad) 18%, transparent); }
 
 @keyframes dash-flow {
   to { stroke-dashoffset: -16; }

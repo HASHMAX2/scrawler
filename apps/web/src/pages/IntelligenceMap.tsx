@@ -5,6 +5,7 @@ import {
   Background,
   BackgroundVariant,
   Controls,
+  MarkerType,
   useReactFlow,
   type Edge,
   type Node,
@@ -56,7 +57,7 @@ function layout(path: IntelNode[], children: IntelNode[]): { id: string; x: numb
 }
 
 const EDGE_COLOR: Record<string, string> = {
-  default: "var(--border)",
+  default: "var(--text-muted)",
   important: "var(--accent)",
   opportunity: "var(--good)",
   risk: "var(--bad)",
@@ -102,6 +103,7 @@ function GraphCanvas({
   const [loading, setLoading] = useState(false);
   const [highlighted, setHighlighted] = useState<Set<string> | null>(null);
   const [explanation, setExplanation] = useState<string | null>(null);
+  const [totalAvailable, setTotalAvailable] = useState<Map<string, number>>(new Map());
 
   const focused = path[path.length - 1];
   const parent = path.length > 1 ? path[path.length - 2] : null;
@@ -114,6 +116,9 @@ function GraphCanvas({
       try {
         const slice = await fetchChildren(node, period);
         setChildrenCache((m) => new Map(m).set(node.id, slice.nodes));
+        if (slice.totalAvailable !== undefined) {
+          setTotalAvailable((m) => new Map(m).set(node.id, slice.totalAvailable!));
+        }
         return slice.nodes;
       } finally {
         setLoading(false);
@@ -184,16 +189,17 @@ function GraphCanvas({
     const list: Edge[] = [];
     if (parent) {
       list.push({
-        id: `e:${parent.id}->${focused.id}`, source: parent.id, target: focused.id, type: "default",
+        id: `e:${parent.id}->${focused.id}`, source: parent.id, target: focused.id, type: "straight",
         style: { stroke: EDGE_COLOR.selected, strokeWidth: 2 }, animated: true,
+        markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLOR.selected, width: 14, height: 14 },
       });
     }
     kids.forEach((c) => {
       const isHighlighted = !highlighted || highlighted.has(c.id);
       const category = c.metrics.find((m) => m.label === "Est. Yield")?.tone === "good" ? "opportunity" : c.metrics.find((m) => m.label === "Est. Yield")?.tone === "bad" ? "risk" : "default";
       list.push({
-        id: `e:${focused.id}->${c.id}`, source: focused.id, target: c.id, type: "default",
-        style: { stroke: EDGE_COLOR[category], strokeWidth: category === "default" ? 1 : 1.6, opacity: isHighlighted ? (category === "default" ? 0.5 : 0.85) : 0.15 },
+        id: `e:${focused.id}->${c.id}`, source: focused.id, target: c.id, type: "straight",
+        style: { stroke: EDGE_COLOR[category], strokeWidth: category === "default" ? 1.2 : 1.8, opacity: isHighlighted ? (category === "default" ? 0.4 : 0.8) : 0.12 },
         animated: category !== "default" && isHighlighted,
       });
     });
@@ -227,6 +233,11 @@ function GraphCanvas({
           </span>
         ))}
         {loading && <span className="text-[var(--text-muted)] ml-2 animate-pulse">loading…</span>}
+        {!loading && totalAvailable.has(focused.id) && kids.length < totalAvailable.get(focused.id)! && (
+          <span className="text-[var(--text-muted)] ml-2">
+            — showing top {kids.length} of {totalAvailable.get(focused.id)} by activity
+          </span>
+        )}
       </div>
 
       {path.length > 1 && (

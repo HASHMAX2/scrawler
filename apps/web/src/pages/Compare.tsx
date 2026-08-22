@@ -42,7 +42,7 @@ export function Compare() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold">Compare Communities</h1>
+      <h1 className="text-xl font-semibold">Compare Communities</h1>
       <Card className="p-4 space-y-3">
         <div className="flex flex-wrap gap-2">
           {keys.map((k) => (

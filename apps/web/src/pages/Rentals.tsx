@@ -57,7 +57,7 @@ export function Rentals() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold">Rental Intelligence</h1>
+      <h1 className="text-xl font-semibold">Rental Intelligence</h1>
       <ChartCard title="New vs Renewal Contracts (weekly)" option={trendOption} height={300} />
 
       <Card className="p-4">

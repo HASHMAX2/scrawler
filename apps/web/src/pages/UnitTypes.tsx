@@ -40,7 +40,7 @@ export function UnitTypes() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold">Unit Type Intelligence</h1>
+      <h1 className="text-xl font-semibold">Unit Type Intelligence</h1>
       <p className="text-xs text-[var(--text-muted)]">
         Are 1BR apartments more liquid than studios? Compare sales & rental demand, pricing, and estimated yield by bedroom type — citywide, this period.
       </p>

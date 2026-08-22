@@ -34,7 +34,7 @@ export function ImportData() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold">Import Data</h1>
+      <h1 className="text-xl font-semibold">Import Data</h1>
       <p className="text-xs text-[var(--text-muted)]">
         Drop a DLD sales or rental CSV export below, or click "Refresh Data" to re-scan the DATA FILES DLD folder for new/changed files. Rebuilding
         the warehouse over the full historical dataset currently takes 1-3 minutes — this is synchronous, so the button will show "Working..." until done.

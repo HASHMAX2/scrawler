@@ -29,7 +29,7 @@ export function Opportunities() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold">Opportunities</h1>
+        <h1 className="text-xl font-semibold">Opportunities</h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">{data.methodology}</p>
       </div>
 

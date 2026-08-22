@@ -55,12 +55,12 @@ function GraphNodeImpl({ data }: NodeProps) {
         style={{
           width: size,
           height: size,
-          background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${color} 32%, var(--surface-2)), var(--surface-2) 75%)`,
-          border: `1.5px solid color-mix(in srgb, ${color} ${isFocused ? 85 : 45}%, var(--border))`,
+          background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${color} 22%, var(--surface-2)), var(--surface-2) 75%)`,
+          border: `1.5px solid color-mix(in srgb, ${color} ${isFocused ? 70 : 40}%, var(--border))`,
           boxShadow: isFocused
-            ? `0 0 0 1px color-mix(in srgb, ${color} 55%, transparent), 0 0 32px 4px color-mix(in srgb, ${color} 45%, transparent)`
+            ? `0 0 0 1px color-mix(in srgb, ${color} 45%, transparent), 0 0 18px 2px color-mix(in srgb, ${color} 22%, transparent)`
             : emphasis === "child"
-              ? `0 0 14px 1px color-mix(in srgb, ${color} 22%, transparent)`
+              ? `0 0 10px 0px color-mix(in srgb, ${color} 14%, transparent)`
               : "none",
         }}
       >

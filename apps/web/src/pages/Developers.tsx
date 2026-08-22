@@ -19,7 +19,7 @@ export function Developers() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold">Developers</h1>
+      <h1 className="text-xl font-semibold">Developers</h1>
       <p className="text-xs text-[var(--text-muted)]">
         Sales figures only cover DLD transactions matched to a scraped development/developer — currently ~3% of projects. Most developer sales
         activity is not yet attributable; see Data Quality for coverage.
