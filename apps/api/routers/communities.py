@@ -148,6 +148,83 @@ def community_detail(community_key: str, period: str = "90d", con=Depends(db)):
         [community_key, window.current_start, window.current_end],
     ).fetchall()
 
+    # DLD's own AREA_EN field only ever reports the broad DLD community
+    # (e.g. "Jumeirah Village Circle"), never a Propsearch sub-district like
+    # "JVC District 10" — so for a sub-district community_key, everything
+    # above is near-zero even though real transactions exist. Recover them
+    # via DLD's PROJECT_EN -> scraped.developments.area_id, which does carry
+    # Propsearch's precise sub-district id (same methodology as
+    # areas.py::_project_matched_stats). Used as the EFFECTIVE figures below
+    # whenever the direct DLD match found nothing, so every consumer of this
+    # endpoint (community detail page, Compare, the Reels engine) sees real
+    # sub-district data instead of a false "no data" for JVC's ~40 districts
+    # and every other scraped sub-area.
+    pm_sales_summary = (0, None, None, None)
+    pm_rental_summary = (0, None, 0, 0)
+    pm_bedroom_sales: list[tuple] = []
+    pm_bedroom_rentals: list[tuple] = []
+    pm_top_projects: list[tuple] = []
+    if scraped_area_id is not None:
+        pm_sales_summary = con.execute(
+            """
+            SELECT count(*), sum(fs.trans_value_aed), median(fs.trans_value_aed), median(fs.price_per_sqft_aed)
+            FROM fact_sales fs JOIN dim_project dp ON fs.project_id = dp.project_id
+            JOIN scraped.developments d ON dp.matched_development_id = d.id
+            WHERE d.area_id = ? AND fs.instance_date BETWEEN ? AND ? AND fs.group_en = 'Sales'
+            """,
+            [scraped_area_id, window.current_start, window.current_end],
+        ).fetchone()
+        pm_rental_summary_row = con.execute(
+            """
+            SELECT count(*), median(fr.annual_amount_aed), sum(fr.is_renewal), sum(NOT fr.is_renewal)
+            FROM fact_rentals fr JOIN dim_project dp ON fr.project_id = dp.project_id
+            JOIN scraped.developments d ON dp.matched_development_id = d.id
+            WHERE d.area_id = ? AND fr.registration_date BETWEEN ? AND ?
+            """,
+            [scraped_area_id, window.current_start, window.current_end],
+        ).fetchone()
+        pm_rental_summary = tuple(v if v is not None else 0 for v in pm_rental_summary_row)
+        pm_bedroom_sales = con.execute(
+            """
+            SELECT fs.canonical_bedroom, count(*) c
+            FROM fact_sales fs JOIN dim_project dp ON fs.project_id = dp.project_id
+            JOIN scraped.developments d ON dp.matched_development_id = d.id
+            WHERE d.area_id = ? AND fs.instance_date BETWEEN ? AND ? AND fs.group_en = 'Sales'
+            GROUP BY 1 ORDER BY c DESC
+            """,
+            [scraped_area_id, window.current_start, window.current_end],
+        ).fetchall()
+        pm_bedroom_rentals = con.execute(
+            """
+            SELECT fr.canonical_bedroom, count(*) c, median(fr.annual_amount_aed)
+            FROM fact_rentals fr JOIN dim_project dp ON fr.project_id = dp.project_id
+            JOIN scraped.developments d ON dp.matched_development_id = d.id
+            WHERE d.area_id = ? AND fr.registration_date BETWEEN ? AND ?
+            GROUP BY 1 ORDER BY c DESC
+            """,
+            [scraped_area_id, window.current_start, window.current_end],
+        ).fetchall()
+        pm_top_projects = con.execute(
+            """
+            SELECT dp.dld_project_name, count(*) c, sum(fs.trans_value_aed)
+            FROM fact_sales fs JOIN dim_project dp ON fs.project_id = dp.project_id
+            JOIN scraped.developments d ON dp.matched_development_id = d.id
+            WHERE d.area_id = ? AND fs.instance_date BETWEEN ? AND ? AND fs.group_en = 'Sales' AND dp.dld_project_name IS NOT NULL
+            GROUP BY 1 ORDER BY c DESC LIMIT 10
+            """,
+            [scraped_area_id, window.current_start, window.current_end],
+        ).fetchall()
+
+    using_project_matched = sales_summary[0] == 0 and rental_summary[0] == 0 and (pm_sales_summary[0] > 0 or pm_rental_summary[0] > 0)
+    if using_project_matched:
+        sales_summary = pm_sales_summary
+        rental_summary = pm_rental_summary
+        bedroom_sales = pm_bedroom_sales
+        total_sales_for_share = sum(c for _, c in bedroom_sales) or 1
+        bedroom_rentals = pm_bedroom_rentals
+        total_rentals_for_share = sum(c for _, c, _ in bedroom_rentals) or 1
+        top_projects = pm_top_projects
+
     top_developers = []
     upcoming_supply = None
     area_profile = None
@@ -182,6 +259,7 @@ def community_detail(community_key: str, period: str = "90d", con=Depends(db)):
         "community_key": community_key,
         "community_name": community_name,
         "has_scraped_profile": scraped_area_id is not None,
+        "data_source": "project_matched" if using_project_matched else "dld_direct",
         "period": window.label,
         "sales": {
             "count": sales_summary[0], "value": sales_summary[1], "median_price": sales_summary[2],

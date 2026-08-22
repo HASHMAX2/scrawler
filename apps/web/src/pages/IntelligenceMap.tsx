@@ -1,98 +1,582 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ReactFlow,
-  ReactFlowProvider,
-  Background,
-  BackgroundVariant,
-  Controls,
-  MarkerType,
-  useReactFlow,
-  type Edge,
-  type Node,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ForceGraph3D, { type ForceGraphMethods, type NodeObject } from "react-force-graph-3d";
+import { forceCollide } from "d3-force-3d";
+import * as THREE from "three";
+import SpriteText from "three-spritetext";
 import { Link } from "react-router-dom";
 import { useFilters } from "../state/FilterContext";
-import { fetchChildren, ROOT_NODE, type IntelNode } from "../lib/graph";
+import { useTheme } from "../state/ThemeContext";
+import { fetchChildren, ROOT_NODE, type EdgeCategory, type IntelNode } from "../lib/graph";
+import { intelColors, type IntelColorSet } from "../lib/intelColors";
 import { runQuery } from "../lib/queryInterpreter";
-import { GraphNode, type GraphNodeData, type NodeEmphasis } from "../components/intel/GraphNode";
-import { FloatingEdge } from "../components/intel/FloatingEdge";
+import { useElementSize } from "../lib/useElementSize";
 import { IntelPanel } from "../components/intel/IntelPanel";
 import { QueryBar } from "../components/intel/QueryBar";
-import { EmptyState } from "../components/ui";
 
-const nodeTypes = { intel: GraphNode };
-const edgeTypes = { floating: FloatingEdge };
+type GNode = IntelNode & { x?: number; y?: number; z?: number };
+type GLink = { id: string; source: string; target: string; category: EdgeCategory };
 
-// ---- Display limits -------------------------------------------------
-// These are UI-layer choices about how many nodes to draw AT ONCE, not
-// claims about how many entities exist. Dubai's real area count (92, as
-// of the current data) comes back from the API on every load via
-// GraphSlice.totalAvailable — whenever the real count exceeds what's
-// shown, a "+N more" node renders so the cap always reads as progressive
-// disclosure, never as "this is the total".
-const MAX_VISIBLE_ROOT_NODES = 10;
-const MAX_VISIBLE_CHILDREN = 8;
-const LOAD_MORE_BATCH = 8;
-
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const CANVAS_CENTER = { x: 640, y: 380 };
-const ANCESTOR_SPACING = 128;
-const ANCESTOR_START_X = 90;
-const CHILD_RADIUS_BASE = 230;
-const CHILD_RADIUS_STEP = 26;
-const CHILD_FAN_DEGREES = 108; // total angular spread children fan across, right of the focused node
-
-function layoutRoot(focused: IntelNode, children: IntelNode[]): { id: string; x: number; y: number }[] {
-  const positions = [{ id: focused.id, x: CANVAS_CENTER.x, y: CANVAS_CENTER.y }];
-  const n = children.length || 1;
-  const radius = Math.max(260, 34 * n);
-  children.forEach((c, i) => {
-    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
-    positions.push({ id: c.id, x: CANVAS_CENTER.x + Math.cos(angle) * radius, y: CANVAS_CENTER.y + Math.sin(angle) * radius });
-  });
-  return positions;
+/** Sphere radius by tier — root is clearly the largest, area/community
+ * nodes are mid-sized ("primary entities"), everything below (project,
+ * building, developer, unit type) is the smallest tier. No emphasis-based
+ * resizing here on top of this — focus/selection is communicated by a
+ * halo ring and opacity instead (see updateNodeAppearance), so a node's
+ * base size never changes and the layout stays predictable. */
+function radiusFor(node: GNode): number {
+  if (node.type === "market") return 26;
+  if (node.type === "area") return 15;
+  return 9;
 }
 
-/** Dubai -> ... -> immediate parent -> FOCUSED -> children, read left to
- * right. Ancestors compress toward the left edge (small, dimmed) so the
- * full lineage stays visible without eating canvas width; children fan
- * outward from the focused node in an arc rather than a straight stack,
- * which is what actually reads as "branching from a parent" instead of a
- * column of unrelated circles. */
-function layoutDrill(ancestors: IntelNode[], focused: IntelNode, children: IntelNode[]): { id: string; x: number; y: number }[] {
-  const positions: { id: string; x: number; y: number }[] = [];
-  ancestors.forEach((a, i) => {
-    positions.push({ id: a.id, x: ANCESTOR_START_X + i * ANCESTOR_SPACING, y: CANVAS_CENTER.y });
-  });
-  const focusX = ANCESTOR_START_X + ancestors.length * ANCESTOR_SPACING + 130;
-  positions.push({ id: focused.id, x: focusX, y: CANVAS_CENTER.y });
-
-  const n = children.length || 1;
-  const radius = CHILD_RADIUS_BASE + Math.max(0, n - 4) * CHILD_RADIUS_STEP;
-  const spreadRad = (CHILD_FAN_DEGREES * Math.PI) / 180;
-  children.forEach((c, i) => {
-    const t = n === 1 ? 0.5 : i / (n - 1);
-    const angle = -spreadRad / 2 + t * spreadRad;
-    positions.push({ id: c.id, x: focusX + radius * Math.cos(angle), y: CANVAS_CENTER.y + radius * Math.sin(angle) });
-  });
-  return positions;
+function categoryColor(category: EdgeCategory, colors: IntelColorSet): string {
+  if (category === "opportunity") return colors.good;
+  if (category === "risk") return colors.bad;
+  return colors.edgeDefault;
 }
 
-const EDGE_COLOR: Record<string, string> = {
-  default: "var(--edge-default)",
-  opportunity: "var(--good)",
-  risk: "var(--bad)",
-  selected: "var(--accent)",
-};
+function buildNodeObject(node: GNode, colors: IntelColorSet): THREE.Group {
+  const group = new THREE.Group();
+  const color = colors.node[node.type];
+  const r = radiusFor(node);
 
-function EdgeLegend() {
-  const items: { color: string; label: string }[] = [
-    { color: "var(--accent)", label: "Selected lineage (Dubai → focused node)" },
-    { color: "var(--good)", label: "Opportunity — yield ≥ 7%" },
-    { color: "var(--bad)", label: "Risk — yield < 4%" },
-    { color: "var(--edge-default)", label: "No strong signal / no yield data" },
+  const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(r, 24, 24),
+    new THREE.MeshPhongMaterial({ color, shininess: 65, transparent: true, opacity: 0.85 }),
+  );
+  group.add(sphere);
+
+  // Halo ring — hidden by default (opacity 0), toggled visible for the
+  // focused node and the selected lineage by updateNodeAppearance below.
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(r * 1.35, r * 1.5, 40),
+    new THREE.MeshBasicMaterial({ color: colors.accent, transparent: true, opacity: 0, side: THREE.DoubleSide }),
+  );
+  group.add(ring);
+
+  const label = new SpriteText(node.name);
+  label.color = colors.text;
+  label.textHeight = node.type === "market" ? 5.4 : node.type === "area" ? 3.6 : 2.8;
+  label.position.set(0, r + 5, 0);
+  group.add(label);
+
+  if (node.badge) {
+    const badge = new SpriteText(node.badge);
+    badge.color = color;
+    badge.textHeight = 2.3;
+    badge.position.set(0, r + 5 - (node.type === "market" ? 6.6 : 4.6), 0);
+    group.add(badge);
+  }
+
+  group.userData.sphere = sphere;
+  group.userData.ring = ring;
+  return group;
+}
+
+export function IntelligenceMap() {
+  const { period } = useFilters();
+  const { theme } = useTheme();
+  const colors = useMemo(() => intelColors(theme), [theme]);
+
+  const fgRef = useRef<ForceGraphMethods<GNode, GLink> | undefined>(undefined);
+  const objectsRef = useRef<Map<string, THREE.Group>>(new Map());
+  const hasFitRef = useRef(false);
+  const { ref: containerRef, size } = useElementSize<HTMLDivElement>();
+
+  const [nodesMap, setNodesMap] = useState<Map<string, GNode>>(new Map());
+  const [edgesMap, setEdgesMap] = useState<Map<string, GLink>>(new Map());
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [focusedId, setFocusedId] = useState<string>(ROOT_NODE.id);
+  const [selected, setSelected] = useState<IntelNode | null>(ROOT_NODE);
+  const [loading, setLoading] = useState(true);
+  const [highlighted, setHighlighted] = useState<Set<string> | null>(null);
+  const [explanation, setExplanation] = useState<string | null>(null);
+
+  // Fresh graph on mount and whenever the period changes (cached metrics
+  // are period-scoped, so a period switch resets back to Dubai).
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    hasFitRef.current = false;
+    objectsRef.current.clear();
+    (async () => {
+      const slice = await fetchChildren(ROOT_NODE, period);
+      if (cancelled) return;
+      const nmap = new Map<string, GNode>([[ROOT_NODE.id, { ...ROOT_NODE }]]);
+      slice.nodes.forEach((n) => nmap.set(n.id, { ...n }));
+      const emap = new Map<string, GLink>();
+      slice.edges.forEach((e) => emap.set(e.id, e));
+      setNodesMap(nmap);
+      setEdgesMap(emap);
+      setExpandedIds(new Set([ROOT_NODE.id]));
+      setFocusedId(ROOT_NODE.id);
+      setSelected(ROOT_NODE);
+      setHighlighted(null);
+      setExplanation(null);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [period]);
+
+  const mergeChildren = useCallback((newNodes: IntelNode[], newEdges: { id: string; source: string; target: string; category: EdgeCategory }[]) => {
+    setNodesMap((prev) => {
+      const next = new Map(prev);
+      let changed = false;
+      newNodes.forEach((n) => {
+        if (!next.has(n.id)) {
+          next.set(n.id, { ...n });
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+    setEdgesMap((prev) => {
+      const next = new Map(prev);
+      let changed = false;
+      newEdges.forEach((e) => {
+        if (!next.has(e.id)) {
+          next.set(e.id, e);
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, []);
+
+  // Drilling into a node with children frames the camera around that node
+  // PLUS its children (via zoomToFit's nodeFilter) rather than flying to a
+  // fixed distance from the clicked node alone — the fixed-distance version
+  // left the other ~90 unrelated siblings from the previous view rendered
+  // at their old (now visually irrelevant) scale, which is exactly what
+  // made drill-down feel cluttered with labels stacking behind nodes. A
+  // short delay lets the just-reheated force simulation spread the new
+  // children away from the parent's initial (stacked) spawn position
+  // before the camera fits to their bounding box. Leaf nodes (no children)
+  // have nothing to fit around, so they keep the simple fly-to-node framing.
+  const focusCamera = useCallback((id: string, node: GNode, willHaveChildren: boolean) => {
+    if (willHaveChildren) {
+      window.setTimeout(() => {
+        fgRef.current?.zoomToFit(800, 90, (n) => n.id === id || (n as GNode).parentId === id);
+      }, 450);
+      return;
+    }
+    const distance = 110;
+    const { x = 0, y = 0, z = 0 } = node;
+    const dist = Math.hypot(x, y, z) || 1;
+    const ratio = 1 + distance / dist;
+    fgRef.current?.cameraPosition({ x: x * ratio, y: y * ratio, z: z * ratio }, { x, y, z }, 900);
+  }, []);
+
+  // Shared by clicking a node in the 3D scene AND clicking a row in the
+  // alphabetical area / sub-community list panels — both are just "the user
+  // picked this entity," so both should expand/focus/fly the same way.
+  const selectNode = useCallback(
+    async (node: GNode) => {
+      const id = String(node.id);
+      setSelected(node);
+      setFocusedId(id);
+      setHighlighted(null);
+      setExplanation(null);
+
+      let willHaveChildren = node.hasChildren && expandedIds.has(id);
+      if (node.hasChildren && !expandedIds.has(id)) {
+        setLoading(true);
+        try {
+          const slice = await fetchChildren(node, period);
+          mergeChildren(slice.nodes, slice.edges);
+          setExpandedIds((prev) => new Set(prev).add(id));
+          willHaveChildren = slice.nodes.length > 0;
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      focusCamera(id, node, willHaveChildren);
+    },
+    [expandedIds, period, mergeChildren, focusCamera],
+  );
+
+  const handleNodeClick = useCallback((node: NodeObject<GNode>) => selectNode(node), [selectNode]);
+
+  const handleListSelect = useCallback(
+    (id: string) => {
+      const node = nodesMap.get(id);
+      if (node) selectNode(node);
+    },
+    [nodesMap, selectNode],
+  );
+
+  // Breadcrumb: walk parentId back from the focused node — no separate
+  // path stack needed, every node already knows its real parent.
+  const breadcrumbPath = useMemo(() => {
+    const trail: GNode[] = [];
+    let cur = nodesMap.get(focusedId);
+    const seen = new Set<string>();
+    while (cur && !seen.has(cur.id)) {
+      seen.add(cur.id);
+      trail.unshift(cur);
+      cur = cur.parentId ? nodesMap.get(cur.parentId) : undefined;
+    }
+    return trail;
+  }, [focusedId, nodesMap]);
+
+  const pathEdgeIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (let i = 0; i < breadcrumbPath.length - 1; i++) {
+      const a = breadcrumbPath[i].id;
+      const b = breadcrumbPath[i + 1].id;
+      edgesMap.forEach((e) => {
+        if (e.source === a && e.target === b) ids.add(e.id);
+      });
+    }
+    return ids;
+  }, [breadcrumbPath, edgesMap]);
+
+  const pathNodeIds = useMemo(() => new Set(breadcrumbPath.map((n) => n.id)), [breadcrumbPath]);
+
+  // The "active neighborhood" for the current drill level: the breadcrumb
+  // ancestors, the focused node itself, and its direct children. Once the
+  // user has drilled past the root, everything outside this set is a
+  // leftover from a previous, now-irrelevant view — dimming it (both the
+  // sphere and its edges, below) is what actually fixes the "cluttered,
+  // labels stack on top of each other" complaint, rather than just making
+  // nodes bigger or smaller. At the root, null means "show everything":
+  // that full 92-area view is the intended top-level picture, not clutter.
+  const activeIds = useMemo(() => {
+    if (focusedId === ROOT_NODE.id) return null;
+    const ids = new Set(pathNodeIds);
+    nodesMap.forEach((n) => {
+      if (n.parentId === focusedId) ids.add(n.id);
+    });
+    return ids;
+  }, [focusedId, pathNodeIds, nodesMap]);
+
+  // Directly mutate the cached Three.js objects rather than rebuilding the
+  // whole scene — cheap, and avoids resetting the physics-simulated x/y/z
+  // any rebuild would otherwise risk disturbing.
+  useEffect(() => {
+    objectsRef.current.forEach((group, id) => {
+      const isFocused = id === focusedId;
+      const onPath = pathNodeIds.has(id);
+      const inNeighborhood = !activeIds || activeIds.has(id);
+      const isQueryMatch = !highlighted || highlighted.has(id);
+      const ring = group.userData.ring as THREE.Mesh;
+      const sphere = group.userData.sphere as THREE.Mesh;
+      const ringMat = ring.material as THREE.MeshBasicMaterial;
+      const sphereMat = sphere.material as THREE.MeshPhongMaterial;
+      ringMat.opacity = isFocused ? 0.85 : 0;
+      sphereMat.opacity = !isQueryMatch ? 0.12 : !inNeighborhood ? 0.1 : isFocused || onPath ? 0.95 : 0.75;
+      group.scale.setScalar(isFocused ? 1.3 : 1);
+    });
+  }, [focusedId, pathNodeIds, activeIds, highlighted]);
+
+  const nodeThreeObject = useCallback(
+    (node: NodeObject<GNode>) => {
+      const group = buildNodeObject(node, colors);
+      objectsRef.current.set(String(node.id), group);
+      return group;
+    },
+    [colors],
+  );
+
+  const graphData = useMemo(
+    () => ({
+      nodes: Array.from(nodesMap.values()),
+      links: Array.from(edgesMap.values()).map((e) => ({ ...e })),
+    }),
+    [nodesMap, edgesMap],
+  );
+
+  // Default 3d-force-graph physics (charge -30, link distance 30) is tuned
+  // for small graphs and leaves ~90 sibling nodes clumped in a tight,
+  // overlapping ball with unreadable labels. Scale repulsion/link distance
+  // to the node's own radius (+ label headroom) and add an explicit
+  // collision force so spheres and their labels never overlap, however many
+  // real siblings a level has.
+  //
+  // The one-time initial "fit everything" used to run off the library's own
+  // onEngineStop event — but that fires the moment the (still default-weak)
+  // simulation's alpha decays below threshold, which can happen before this
+  // effect has even applied the stronger forces below. That race is what
+  // produced a tight, overlapping zoomed-in ball: the camera locked onto the
+  // old cramped bounding box, then the graph re-spread underneath it. Doing
+  // the fit from right here — after the real forces are set and the
+  // simulation is reheated, on a timer long enough for it to actually
+  // re-settle — removes the race.
+  useEffect(() => {
+    const fg = fgRef.current;
+    if (!fg) return;
+    fg.d3Force("charge")?.strength(-320).distanceMax(2200);
+    fg.d3Force("link")?.distance((link: { source: GNode; target: GNode }) => {
+      const target = link.target as GNode;
+      return radiusFor(target) * 9 + 40;
+    });
+    fg.d3Force("collide", forceCollide((node: GNode) => radiusFor(node) + 34));
+    fg.d3ReheatSimulation();
+
+    // Damped orbit controls turn scroll-wheel zoom into a decelerating glide
+    // instead of a hard per-tick snap — the "smooth" half of the zoom
+    // buttons' animated cameraPosition tween above.
+    const controls = fg.controls() as { enableDamping?: boolean; dampingFactor?: number; zoomSpeed?: number };
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.12;
+    controls.zoomSpeed = 0.6;
+
+    if (!hasFitRef.current && graphData.nodes.length > 1) {
+      hasFitRef.current = true;
+      const t = window.setTimeout(() => fgRef.current?.zoomToFit(700, 24), 1000);
+      return () => window.clearTimeout(t);
+    }
+  }, [graphData.nodes.length]);
+
+  // Dollies the camera toward/away from the current orbit target along the
+  // existing camera->target ray, animated over the same transition length
+  // used everywhere else (cameraPosition's own tween) rather than jumping —
+  // that's what makes it read as "smooth" instead of a hard cut.
+  const zoomBy = useCallback((factor: number) => {
+    const fg = fgRef.current;
+    if (!fg) return;
+    const camera = fg.camera();
+    const target = (fg.controls() as { target: THREE.Vector3 }).target;
+    fg.cameraPosition(
+      {
+        x: target.x + (camera.position.x - target.x) * factor,
+        y: target.y + (camera.position.y - target.y) * factor,
+        z: target.z + (camera.position.z - target.z) * factor,
+      },
+      { x: target.x, y: target.y, z: target.z },
+      450,
+    );
+  }, []);
+
+  const goToNode = useCallback(
+    (id: string) => {
+      const node = nodesMap.get(id);
+      if (!node) return;
+      setSelected(node);
+      setFocusedId(id);
+      setHighlighted(null);
+      setExplanation(null);
+      const hasLoadedChildren = Array.from(nodesMap.values()).some((n) => n.parentId === id);
+      focusCamera(id, node, hasLoadedChildren);
+    },
+    [nodesMap, focusCamera],
+  );
+
+  // Edges get the same neighborhood dimming as nodes (see activeIds above):
+  // an edge blending into the background color reads as "not part of the
+  // current view" without needing a separate opacity channel per link
+  // (linkOpacity is a single graph-wide number in this library, not a
+  // per-link accessor, so color is the lever available here).
+  const isEdgeActive = useCallback(
+    (l: GLink) => {
+      if (!activeIds) return true;
+      const source = l.source as unknown as string | GNode;
+      const target = l.target as unknown as string | GNode;
+      const s = typeof source === "object" ? source.id : source;
+      const t = typeof target === "object" ? target.id : target;
+      return activeIds.has(String(s)) && activeIds.has(String(t));
+    },
+    [activeIds],
+  );
+
+  const focusedChildren = useMemo(
+    () => Array.from(nodesMap.values()).filter((n) => n.parentId === focusedId),
+    [nodesMap, focusedId],
+  );
+
+  // Alphabetical directories — the graph itself sorts/sizes nodes by
+  // transaction activity (that's what makes it a useful map), which makes a
+  // specific area slow to hunt for by eye. These lists are a parallel A-Z
+  // index into the exact same node set: picking a row drives the graph
+  // (selectNode) exactly like clicking its sphere would.
+  const allAreas = useMemo(
+    () =>
+      Array.from(nodesMap.values())
+        .filter((n) => n.parentId === ROOT_NODE.id)
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [nodesMap],
+  );
+  const subCommunities = useMemo(
+    () =>
+      focusedId === ROOT_NODE.id
+        ? []
+        : focusedChildren.filter((n) => n.type === "area").sort((a, b) => a.name.localeCompare(b.name)),
+    [focusedChildren, focusedId],
+  );
+
+  const handleQuery = (q: string) => {
+    const result = runQuery(q, Array.from(nodesMap.values()));
+    setHighlighted(result.matchedIds.length ? new Set(result.matchedIds) : null);
+    setExplanation(result.explanation);
+  };
+
+  return (
+    <div className="intel-scope flex h-full w-full -m-6" style={{ height: "calc(100% + 3rem)" }}>
+      <div ref={containerRef} className="relative flex-1 h-full overflow-hidden">
+        <div className="absolute top-4 left-5 z-10 flex items-center gap-1.5 text-xs flex-wrap max-w-[70%]">
+          <Link to="/" className="text-[var(--text-muted)] hover:text-[var(--text)]">Dubai</Link>
+          {breadcrumbPath.slice(1).map((n, i) => (
+            <span key={n.id} className="flex items-center gap-1.5">
+              <span className="text-[var(--text-muted)]">/</span>
+              <button
+                onClick={() => goToNode(n.id)}
+                className={i === breadcrumbPath.length - 2 ? "text-[var(--accent)] font-medium" : "text-[var(--text-muted)] hover:text-[var(--text)]"}
+              >
+                {n.name}
+              </button>
+            </span>
+          ))}
+          {loading && <span className="text-[var(--text-muted)] ml-2 animate-pulse">loading…</span>}
+          {!loading && <span className="text-[var(--text-muted)] ml-2">— {nodesMap.size - 1} entities in view</span>}
+        </div>
+
+        <div className="absolute top-4 right-5 z-10 flex items-center gap-2">
+          <button
+            onClick={() => fgRef.current?.zoomToFit(700, 24)}
+            className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] rounded-full px-3 py-1.5 bg-[var(--surface)]/80 backdrop-blur"
+          >
+            Fit All
+          </button>
+          {breadcrumbPath.length > 1 && (
+            <button
+              onClick={() => goToNode(breadcrumbPath[breadcrumbPath.length - 2].id)}
+              className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] rounded-full px-3 py-1.5 bg-[var(--surface)]/80 backdrop-blur"
+            >
+              &larr; Back
+            </button>
+          )}
+        </div>
+
+        <EntityListPanel
+          allAreas={allAreas}
+          subCommunities={subCommunities}
+          subCommunityParentName={nodesMap.get(focusedId)?.name}
+          focusedId={focusedId}
+          onSelect={handleListSelect}
+        />
+
+        {size.width > 0 && (
+          <ForceGraph3D
+            ref={fgRef}
+            graphData={graphData}
+            width={size.width}
+            height={size.height}
+            backgroundColor={colors.background}
+            nodeId="id"
+            nodeThreeObject={nodeThreeObject}
+            nodeThreeObjectExtend={false}
+            nodeLabel={(n) => (n as GNode).name}
+            onNodeClick={handleNodeClick}
+            linkColor={(l) => (isEdgeActive(l as GLink) ? categoryColor((l as GLink).category, colors) : colors.background)}
+            linkWidth={(l) => (pathEdgeIds.has(String((l as GLink).id)) ? 2.4 : (l as GLink).category === "default" ? 0.5 : 1)}
+            linkOpacity={0.5}
+            linkDirectionalParticles={(l) =>
+              !isEdgeActive(l as GLink) ? 0 : pathEdgeIds.has(String((l as GLink).id)) ? 2 : (l as GLink).category === "default" ? 0 : 1
+            }
+            linkDirectionalParticleWidth={1.6}
+            linkDirectionalParticleSpeed={0.006}
+            enableNodeDrag={false}
+            showNavInfo={false}
+          />
+        )}
+
+        <ZoomControls onZoomIn={() => zoomBy(0.7)} onZoomOut={() => zoomBy(1.4)} />
+        <EdgeLegend colors={colors} />
+        <QueryBar onQuery={handleQuery} explanation={explanation} />
+      </div>
+
+      <div className="w-[340px] shrink-0">
+        <IntelPanel node={selected ?? nodesMap.get(focusedId) ?? ROOT_NODE} children={focusedChildren} />
+      </div>
+    </div>
+  );
+}
+
+/** A-Z directory of areas (and, once one is focused, its sub-communities)
+ * living alongside the graph — picking a row drives the same selectNode
+ * path a click on the sphere itself would, so the two ways of navigating
+ * never fall out of sync. */
+function EntityListPanel({
+  allAreas,
+  subCommunities,
+  subCommunityParentName,
+  focusedId,
+  onSelect,
+}: {
+  allAreas: GNode[];
+  subCommunities: GNode[];
+  subCommunityParentName: string | undefined;
+  focusedId: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div className="absolute top-16 right-5 z-10 w-64 flex flex-col gap-3">
+      <div className="bg-[var(--surface)]/90 backdrop-blur border border-[var(--border)] rounded-lg overflow-hidden">
+        <div className="px-3 py-2 text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wide border-b border-[var(--border)]">
+          Areas A–Z ({allAreas.length})
+        </div>
+        <div className="max-h-56 overflow-y-auto">
+          {allAreas.map((n) => (
+            <button
+              key={n.id}
+              onClick={() => onSelect(n.id)}
+              className={`w-full text-left px-3 py-1.5 text-xs truncate hover:bg-[var(--bg)] ${
+                n.id === focusedId ? "text-[var(--accent)] font-medium bg-[var(--bg)]" : "text-[var(--text)]"
+              }`}
+            >
+              {n.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {subCommunities.length > 0 && (
+        <div className="bg-[var(--surface)]/90 backdrop-blur border border-[var(--border)] rounded-lg overflow-hidden">
+          <div className="px-3 py-2 text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wide border-b border-[var(--border)]">
+            {subCommunityParentName ?? "Sub-communities"} A–Z ({subCommunities.length})
+          </div>
+          <div className="max-h-56 overflow-y-auto">
+            {subCommunities.map((n) => (
+              <button
+                key={n.id}
+                onClick={() => onSelect(n.id)}
+                className={`w-full text-left px-3 py-1.5 text-xs truncate hover:bg-[var(--bg)] ${
+                  n.id === focusedId ? "text-[var(--accent)] font-medium bg-[var(--bg)]" : "text-[var(--text)]"
+                }`}
+              >
+                {n.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ZoomControls({ onZoomIn, onZoomOut }: { onZoomIn: () => void; onZoomOut: () => void }) {
+  const btnClass =
+    "w-8 h-8 flex items-center justify-center text-base leading-none text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg)] transition-colors";
+  return (
+    <div className="absolute bottom-24 right-5 z-10 flex flex-col bg-[var(--surface)]/90 backdrop-blur border border-[var(--border)] rounded-lg overflow-hidden">
+      <button onClick={onZoomIn} className={`${btnClass} border-b border-[var(--border)]`} aria-label="Zoom in" title="Zoom in">
+        +
+      </button>
+      <button onClick={onZoomOut} className={btnClass} aria-label="Zoom out" title="Zoom out">
+        &minus;
+      </button>
+    </div>
+  );
+}
+
+function EdgeLegend({ colors }: { colors: IntelColorSet }) {
+  const items = [
+    { color: colors.accent, label: "Selected lineage (Dubai → focused node)" },
+    { color: colors.good, label: "Opportunity — yield ≥ 7%" },
+    { color: colors.bad, label: "Risk — yield < 4%" },
+    { color: colors.edgeDefault, label: "No strong signal / no yield data" },
   ];
   return (
     <div className="absolute bottom-24 left-5 z-10 flex flex-col gap-1.5 bg-[var(--surface)]/85 backdrop-blur border border-[var(--border)] rounded-lg px-3 py-2.5">
@@ -104,302 +588,4 @@ function EdgeLegend() {
       ))}
     </div>
   );
-}
-
-function GraphCanvas({
-  path, setPath, childrenCache, setChildrenCache, setSelected, period,
-}: {
-  path: IntelNode[];
-  setPath: (p: IntelNode[]) => void;
-  childrenCache: Map<string, IntelNode[]>;
-  setChildrenCache: (updater: (m: Map<string, IntelNode[]>) => Map<string, IntelNode[]>) => void;
-  setSelected: (n: IntelNode | null) => void;
-  period: string;
-}) {
-  const { fitView } = useReactFlow();
-  const [loading, setLoading] = useState(false);
-  const [highlighted, setHighlighted] = useState<Set<string> | null>(null);
-  const [explanation, setExplanation] = useState<string | null>(null);
-  const [totalAvailable, setTotalAvailable] = useState<Map<string, number>>(new Map());
-  const [visibleCount, setVisibleCount] = useState<Map<string, number>>(new Map());
-
-  const focused = path[path.length - 1];
-  const ancestors = path.slice(0, -1);
-  const parent = ancestors.length > 0 ? ancestors[ancestors.length - 1] : null;
-  const allKids = childrenCache.get(focused.id) ?? [];
-  const defaultVisible = parent ? MAX_VISIBLE_CHILDREN : MAX_VISIBLE_ROOT_NODES;
-  const shown = visibleCount.get(focused.id) ?? defaultVisible;
-  const kids = allKids.slice(0, shown);
-  const remaining = allKids.length - kids.length;
-
-  const loadChildren = useCallback(
-    async (node: IntelNode) => {
-      if (childrenCache.has(node.id)) return childrenCache.get(node.id)!;
-      setLoading(true);
-      try {
-        const slice = await fetchChildren(node, period);
-        setChildrenCache((m) => new Map(m).set(node.id, slice.nodes));
-        setTotalAvailable((m) => new Map(m).set(node.id, slice.totalAvailable));
-        return slice.nodes;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [childrenCache, setChildrenCache, period],
-  );
-
-  useEffect(() => {
-    loadChildren(focused);
-  }, [focused.id, period]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleSelect = useCallback(
-    async (node: IntelNode) => {
-      setSelected(node);
-      setHighlighted(null);
-      setExplanation(null);
-      if (node.hasChildren && node.id !== focused.id) {
-        await loadChildren(node);
-        setPath([...path, node]);
-      }
-    },
-    [focused.id, loadChildren, path, setPath, setSelected],
-  );
-
-  const goToAncestor = useCallback(
-    (node: IntelNode) => {
-      const idx = path.findIndex((p) => p.id === node.id);
-      if (idx === -1) return;
-      const nextPath = path.slice(0, idx + 1);
-      setPath(nextPath);
-      setSelected(nextPath[nextPath.length - 1]);
-      setHighlighted(null);
-      setExplanation(null);
-    },
-    [path, setPath, setSelected],
-  );
-
-  const goBack = useCallback(() => {
-    if (path.length <= 1) return;
-    goToAncestor(path[path.length - 2]);
-  }, [path, goToAncestor]);
-
-  const showMore = useCallback(() => {
-    setVisibleCount((m) => new Map(m).set(focused.id, shown + LOAD_MORE_BATCH));
-  }, [focused.id, shown]);
-
-  useEffect(() => {
-    const t = setTimeout(() => fitView({ padding: 0.24, duration: 500 }), 40);
-    return () => clearTimeout(t);
-  }, [focused.id, kids.length, ancestors.length, fitView]);
-
-  // The "+N more" node is laid out as one more slot in the SAME fan/ring as
-  // the real children (computed together, in one pass) — laying it out
-  // separately would use a different spacing (N vs N+1 items) and land it
-  // on top of a real sibling, which is exactly the overlap bug this avoids.
-  const moreNode: IntelNode | null = useMemo(() => {
-    if (remaining <= 0) return null;
-    return {
-      id: `more:${focused.id}`, type: allKids[0]?.type ?? "area", name: `+${remaining} more`, shortCode: "",
-      metrics: [], parentId: focused.id, hasChildren: false, fetchKey: "", raw: { remaining },
-    };
-  }, [remaining, focused.id, allKids]);
-
-  const displayChildren = useMemo(() => (moreNode ? [...kids, moreNode] : kids), [kids, moreNode]);
-
-  const positions = useMemo(
-    () => (parent ? layoutDrill(ancestors, focused, displayChildren) : layoutRoot(focused, displayChildren)),
-    [parent, ancestors, focused, displayChildren],
-  );
-  const posMap = useMemo(() => new Map(positions.map((p) => [p.id, p])), [positions]);
-
-  const nodes: Node[] = useMemo(() => {
-    const list: Node[] = [];
-    ancestors.forEach((a, i) => {
-      const p = posMap.get(a.id);
-      if (!p) return;
-      const isImmediateParent = i === ancestors.length - 1;
-      list.push({
-        id: a.id, type: "intel", position: { x: p.x, y: p.y }, draggable: false, selectable: false,
-        data: {
-          node: a,
-          emphasis: (highlighted && !highlighted.has(a.id) ? "dimmed" : isImmediateParent ? "parent" : "trail") as NodeEmphasis,
-          onSelect: () => goToAncestor(a),
-        } satisfies GraphNodeData,
-      });
-    });
-    const f = posMap.get(focused.id);
-    if (f) {
-      list.push({
-        id: focused.id, type: "intel", position: { x: f.x, y: f.y }, draggable: false, selectable: false,
-        data: { node: focused, emphasis: (highlighted && !highlighted.has(focused.id) ? "dimmed" : "focused") as NodeEmphasis, onSelect: () => setSelected(focused) } satisfies GraphNodeData,
-      });
-    }
-    kids.forEach((c) => {
-      const cp = posMap.get(c.id);
-      if (!cp) return;
-      list.push({
-        id: c.id, type: "intel", position: { x: cp.x, y: cp.y }, draggable: false, selectable: false,
-        data: { node: c, emphasis: (highlighted && !highlighted.has(c.id) ? "dimmed" : "child") as NodeEmphasis, onSelect: handleSelect } satisfies GraphNodeData,
-      });
-    });
-    if (moreNode) {
-      const mp = posMap.get(moreNode.id);
-      if (mp) {
-        list.push({
-          id: moreNode.id, type: "intel", position: { x: mp.x, y: mp.y }, draggable: false, selectable: false,
-          data: { node: moreNode, emphasis: "more" as NodeEmphasis, onSelect: showMore } satisfies GraphNodeData,
-        });
-      }
-    }
-    return list;
-  }, [ancestors, focused, kids, posMap, handleSelect, goToAncestor, setSelected, highlighted, moreNode, showMore]);
-
-  const edges: Edge[] = useMemo(() => {
-    const list: Edge[] = [];
-    for (let i = 0; i < ancestors.length; i++) {
-      const a = ancestors[i];
-      const b = i + 1 < ancestors.length ? ancestors[i + 1] : focused;
-      list.push({
-        id: `e:${a.id}->${b.id}`, source: a.id, target: b.id, type: "floating",
-        style: { stroke: EDGE_COLOR.selected, strokeWidth: 2 },
-        markerEnd: i === ancestors.length - 1 ? { type: MarkerType.ArrowClosed, color: EDGE_COLOR.selected, width: 14, height: 14 } : undefined,
-      });
-    }
-    kids.forEach((c) => {
-      const isHighlighted = !highlighted || highlighted.has(c.id);
-      const category = c.metrics.find((m) => m.label === "Est. Yield")?.tone === "good" ? "opportunity" : c.metrics.find((m) => m.label === "Est. Yield")?.tone === "bad" ? "risk" : "default";
-      list.push({
-        id: `e:${focused.id}->${c.id}`, source: focused.id, target: c.id, type: "floating",
-        style: { stroke: EDGE_COLOR[category], strokeWidth: category === "default" ? 1.2 : 1.8, opacity: isHighlighted ? (category === "default" ? 0.45 : 0.85) : 0.12 },
-        animated: category !== "default" && isHighlighted,
-      });
-    });
-    if (moreNode) {
-      list.push({
-        id: `e:${focused.id}->more`, source: focused.id, target: moreNode.id, type: "floating",
-        style: { stroke: "var(--edge-default)", strokeWidth: 1, strokeDasharray: "3 3", opacity: 0.7 },
-      });
-    }
-    return list;
-  }, [ancestors, focused, kids, highlighted, moreNode]);
-
-  const visibleNodes = useMemo(() => [...ancestors, focused, ...kids], [ancestors, focused, kids]);
-
-  const handleQuery = (q: string) => {
-    const result = runQuery(q, visibleNodes);
-    setHighlighted(result.matchedIds.length ? new Set(result.matchedIds) : null);
-    setExplanation(result.explanation);
-  };
-
-  return (
-    <div className="relative flex-1 h-full">
-      <div className="absolute top-4 left-5 z-10 flex items-center gap-1.5 text-xs flex-wrap max-w-[70%]">
-        <Link to="/" className="text-[var(--text-muted)] hover:text-[var(--text)]">Dubai</Link>
-        {path.slice(1).map((n, i) => (
-          <span key={n.id} className="flex items-center gap-1.5">
-            <span className="text-[var(--text-muted)]">/</span>
-            <button
-              onClick={() => goToAncestor(n)}
-              className={i === path.length - 2 ? "text-[var(--accent)] font-medium" : "text-[var(--text-muted)] hover:text-[var(--text)]"}
-            >
-              {n.name}
-            </button>
-          </span>
-        ))}
-        {loading && <span className="text-[var(--text-muted)] ml-2 animate-pulse">loading…</span>}
-        {!loading && totalAvailable.has(focused.id) && kids.length < totalAvailable.get(focused.id)! && (
-          <span className="text-[var(--text-muted)] ml-2">
-            — showing {kids.length} of {totalAvailable.get(focused.id)} by activity
-          </span>
-        )}
-      </div>
-
-      {path.length > 1 && (
-        <button
-          onClick={goBack}
-          className="absolute top-4 right-5 z-10 text-xs text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] rounded-full px-3 py-1.5 bg-[var(--surface)]/80 backdrop-blur"
-        >
-          &larr; Back
-        </button>
-      )}
-
-      {!loading && allKids.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="pointer-events-auto">
-            <EmptyState title="No connected entities available" detail={`${focused.name} has no further drill-down data in the current dataset.`} />
-          </div>
-        </div>
-      )}
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        onNodeClick={(_event, flowNode) => {
-          const d = flowNode.data as GraphNodeData;
-          d.onSelect(d.node);
-        }}
-        fitView
-        minZoom={0.3}
-        maxZoom={1.5}
-        panOnScroll
-        nodesDraggable={false}
-        nodesConnectable={false}
-        proOptions={{ hideAttribution: true }}
-      >
-        <Background variant={BackgroundVariant.Dots} gap={28} size={1} color="var(--border)" style={{ opacity: 0.5 }} />
-        <Controls showInteractive={false} className="!bg-[var(--surface)] !border !border-[var(--border)] !shadow-lg [&>button]:!bg-[var(--surface)] [&>button]:!border-[var(--border)] [&>button]:!text-[var(--text)] [&>button:hover]:!bg-[var(--hover-overlay)]" />
-      </ReactFlow>
-
-      <EdgeLegend />
-      <QueryBar onQuery={handleQuery} explanation={explanation} />
-    </div>
-  );
-}
-
-export function IntelligenceMap() {
-  const { period } = useFilters();
-  const [path, setPath] = useState<IntelNode[]>([ROOT_NODE]);
-  const [childrenCache, setChildrenCache] = useState<Map<string, IntelNode[]>>(new Map());
-  const [selected, setSelected] = useState<IntelNode | null>(ROOT_NODE);
-
-  // A period change invalidates cached metrics — reset to Dubai to avoid
-  // showing stale-period numbers under a fresh path.
-  useEffect(() => {
-    setPath([ROOT_NODE]);
-    setSelected(ROOT_NODE);
-    setChildrenCache(new Map());
-  }, [period]);
-
-  const focused = path[path.length - 1];
-  const kids = childrenCache.get(focused.id) ?? [];
-
-  return (
-    <div className="intel-scope flex h-full w-full -m-6" style={{ height: "calc(100% + 3rem)", transition: `background-color 400ms ${cubicBezierCss(EASE)}` }}>
-      <ReactFlowProvider>
-        <GraphCanvas
-          path={path} setPath={setPath}
-          childrenCache={childrenCache} setChildrenCache={setChildrenCache}
-          setSelected={setSelected}
-          period={period}
-        />
-      </ReactFlowProvider>
-      <div className="w-[340px] shrink-0">
-        {childrenCache.has(focused.id) ? (
-          <IntelPanel node={selected ?? focused} children={kids} />
-        ) : (
-          <div className="h-full border-l border-[var(--border)] p-5 space-y-3">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-14 rounded-lg bg-[var(--surface-2)] animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function cubicBezierCss([a, b, c, d]: [number, number, number, number]): string {
-  return `cubic-bezier(${a}, ${b}, ${c}, ${d})`;
 }

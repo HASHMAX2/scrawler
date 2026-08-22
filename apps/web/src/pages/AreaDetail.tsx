@@ -157,7 +157,7 @@ function ChildCard({ child, onClick }: { child: AreaChildItem; onClick: () => vo
   return (
     <Card className="overflow-hidden cursor-pointer hover:border-[var(--accent)] transition-colors">
       <button onClick={onClick} className="block w-full text-left">
-        <div className="h-24 bg-[var(--surface-2)]">
+        <div className="h-32 bg-[var(--surface-2)]">
           {child.hero_image_url && (
             <img
               src={upgradeToXlImage(child.hero_image_url)}

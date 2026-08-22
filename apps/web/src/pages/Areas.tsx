@@ -54,7 +54,7 @@ function AreaCard({ area, onClick }: { area: AreaListItem; onClick: () => void }
   return (
     <Card className="overflow-hidden cursor-pointer hover:border-[var(--accent)] transition-colors" >
       <button onClick={onClick} className="block w-full text-left">
-        <div className="h-32 bg-[var(--surface-2)]">
+        <div className="h-40 bg-[var(--surface-2)]">
           {area.hero_image_url && (
             <img
               src={upgradeToXlImage(area.hero_image_url)}

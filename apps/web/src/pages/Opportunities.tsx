@@ -9,9 +9,17 @@ function OpportunityList({ items }: { items: OpportunityItem[] }) {
   return (
     <ul className="space-y-2">
       {items.map((item) => (
-        <li key={item.community_key} className="border border-[var(--border)] rounded p-3">
-          <Link to={`/communities/${encodeURIComponent(item.community_key)}`} className="font-medium text-[var(--accent)]">{item.community_name}</Link>
-          <p className="text-xs text-[var(--text-muted)] mt-1">{item.why}</p>
+        <li key={item.community_key}>
+          <Link
+            to={`/communities/${encodeURIComponent(item.community_key)}`}
+            className="group block border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] rounded p-3 transition-colors"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium group-hover:text-[var(--accent)] transition-colors">{item.community_name}</span>
+              <span className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors shrink-0" aria-hidden="true">&rarr;</span>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-1">{item.why}</p>
+          </Link>
         </li>
       ))}
     </ul>

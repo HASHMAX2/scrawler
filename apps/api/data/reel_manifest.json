@@ -1,0 +1,2779 @@
+[
+  {
+    "id": 1,
+    "title": "The 5 best-selling Dubai projects this week",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Transactions + units sold",
+    "requiredSources": [
+      "DLD-T",
+      "OWN"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 2,
+    "title": "Dubai sold AED X billion of property this week",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Total transaction value",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 3,
+    "title": "Where did Dubai buyers spend the most money this week?",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Sales value by area",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 4,
+    "title": "The 5 communities selling the most homes right now",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Transaction volume by area",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 5,
+    "title": "These developers dominated Dubai sales this month",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Transactions by developer",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-P"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 6,
+    "title": "Off-plan vs ready: what buyers actually bought this month",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Registration type / off-plan vs ready split",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 7,
+    "title": "Apartments vs villas: where is the money going?",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Property type transaction volume/value",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 8,
+    "title": "Dubai's fastest-selling unit type this month",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Studio / 1BR / 2BR / villa transaction counts",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 9,
+    "title": "The biggest property deal recorded this week",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Maximum transaction value + project/area",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 10,
+    "title": "Top 5 projects by sales VALUE vs sales VOLUME",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "AED value + transaction count",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 11,
+    "title": "Which community suddenly exploded in sales this month?",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Month-on-month transaction growth",
+    "requiredSources": [
+      "OWN",
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 12,
+    "title": "Which community just lost buyer momentum?",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Declining transaction volume / value",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 13,
+    "title": "Where is PSF increasing fastest?",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Rolling median PSF change",
+    "requiredSources": [
+      "OWN",
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 14,
+    "title": "Where is PSF falling despite Dubai's growth?",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Negative PSF trend",
+    "requiredSources": [
+      "OWN",
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 15,
+    "title": "The Dubai property market in 30 seconds — this week",
+    "category": "Weekly / Monthly Market Reels",
+    "franchise": "Dubai This Week",
+    "analyticalAngle": "Sales, value, top area, top project, off-plan share",
+    "requiredSources": [
+      "OWN",
+      "DLD-T"
+    ],
+    "outputType": "market_update"
+  },
+  {
+    "id": 16,
+    "title": "JVC vs Arjan: where would I put AED 1M?",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Price, rent, yield, liquidity, supply",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DLD-P"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 17,
+    "title": "Business Bay vs Downtown for investment",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "PSF, rent, yield, transaction velocity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 18,
+    "title": "Dubai Marina vs JLT",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "PSF, rent, liquidity, supply",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 19,
+    "title": "Dubai Hills vs Downtown",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Price, rent, unit type, liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 20,
+    "title": "Dubai South vs JVC",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Price, rent, supply pipeline, liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DLD-P"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 21,
+    "title": "Arjan vs Dubai Sports City",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "PSF, rent, yield, transaction count",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 22,
+    "title": "Dubai Silicon Oasis vs International City",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Entry price, rents, yields, liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 23,
+    "title": "JVC vs Dubai Sports City for rental yield",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Gross/net yield and rental demand",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 24,
+    "title": "DAMAC Hills vs DAMAC Hills 2",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Villa/townhouse prices, rents, liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 25,
+    "title": "Arabian Ranches vs Dubai Hills villas",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Villa price, rent, PSF and sales velocity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 26,
+    "title": "Al Furjan vs JVC",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Price, rent, supply, liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DLD-P"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 27,
+    "title": "Dubai South vs Emaar South",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Price, rent, pipeline, developer/product mix",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DLD-P"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 28,
+    "title": "Palm Jumeirah vs Bluewaters: ultra-luxury numbers",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Luxury PSF, deal values, rent/yield, liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "Bayut",
+      "KF"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 29,
+    "title": "Tilal Al Ghaf vs Arabian Ranches",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Villa prices, rents, liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 30,
+    "title": "JVC vs Business Bay: yield or appreciation?",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Yield + PSF growth + liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 31,
+    "title": "Dubai Marina vs Business Bay: which has better liquidity?",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Transaction velocity and turnover",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 32,
+    "title": "Old Dubai vs New Dubai: where are yields higher?",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Rent / purchase price by area cohort",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 33,
+    "title": "AED 2M in Dubai Hills or two smaller JVC units?",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Portfolio yield, vacancy, resale liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 34,
+    "title": "One AED 4M villa vs four AED 1M apartments",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Yield, vacancy diversification, liquidity, costs",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 35,
+    "title": "Waterfront premium: is it actually worth paying for?",
+    "category": "Community vs Community",
+    "franchise": "Dubai Data Battle",
+    "analyticalAngle": "Waterfront vs nearby non-waterfront PSF/rent",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "comparison"
+  },
+  {
+    "id": 36,
+    "title": "Dubai's highest-yield communities right now",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Annual rent / purchase price",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 37,
+    "title": "Studios vs 1BR: which actually gives higher ROI?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Yield by unit type",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 38,
+    "title": "1BR vs 2BR: which is easier to rent?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Rental transaction volume / turnover",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 39,
+    "title": "The most rented apartment type in JVC",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Rental contracts by bedrooms",
+    "requiredSources": [
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 40,
+    "title": "Which JVC buildings have the strongest rental demand?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Contracts per project/building",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 41,
+    "title": "Which communities have the most rental transactions?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Registered rental-contract volume",
+    "requiredSources": [
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 42,
+    "title": "Where are rents increasing fastest?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "YoY / rolling rent growth",
+    "requiredSources": [
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 43,
+    "title": "Where have Dubai rents stopped rising?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Flat/negative rent trend",
+    "requiredSources": [
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 44,
+    "title": "AED 1M apartment: how much rent should it actually generate?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Median purchase price + median annual rent",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 45,
+    "title": "Is 8% ROI in Dubai actually real?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Gross vs realistic net yield",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "Mollak"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 46,
+    "title": "The difference between gross ROI and what you actually pocket",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Service charge + vacancy + recurring costs",
+    "requiredSources": [
+      "DLD",
+      "RERA",
+      "Mollak"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 47,
+    "title": "Buildings where service charges destroy your ROI",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Rent less annual service charges",
+    "requiredSources": [
+      "Mollak",
+      "DLD"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 48,
+    "title": "Cheap apartment, terrible investment?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Low PSF + weak rental demand/liquidity",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 49,
+    "title": "Expensive apartment, surprisingly good investment?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "High PSF + strong rent/liquidity",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 50,
+    "title": "Where tenants are paying a premium for 1BRs",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Rental PSF comparison",
+    "requiredSources": [
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 51,
+    "title": "Are villas or apartments giving better yields?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Rental yield comparison by property type",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 52,
+    "title": "Best rental yield under AED 1M",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Filter by purchase budget then rank yield",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 53,
+    "title": "Best yield under AED 2M",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Filter by purchase budget then rank yield",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 54,
+    "title": "Dubai communities with 7%+ gross yield — but would I buy them?",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Yield + liquidity + future supply",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 55,
+    "title": "Rental yield vs capital appreciation: you usually can't maximize both",
+    "category": "Rental & Yield Reels",
+    "franchise": null,
+    "analyticalAngle": "Historical PSF CAGR + current yield",
+    "requiredSources": [
+      "Historical DLD",
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 56,
+    "title": "Is [PROJECT] actually a good investment?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Price, comps, rent, supply, liquidity, payment plan",
+    "requiredSources": [
+      "DEV",
+      "DLD comparables"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 57,
+    "title": "[PROJECT] is selling at AED X PSF. Is that expensive?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Launch PSF vs community / nearby comps",
+    "requiredSources": [
+      "DEV",
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 58,
+    "title": "What you're actually paying for at [PROJECT]",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Price premium vs location, brand, amenities, payment terms",
+    "requiredSources": [
+      "DEV",
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 59,
+    "title": "3 nearby projects cheaper than [PROJECT]",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Comparable off-plan/ready PSF",
+    "requiredSources": [
+      "DLD-T",
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 60,
+    "title": "3 reasons I would buy [PROJECT] — and 2 reasons I wouldn't",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Balanced investment scorecard",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-T",
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 61,
+    "title": "Would I buy [PROJECT] at today's launch price?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Launch PSF vs resale/off-plan comps",
+    "requiredSources": [
+      "DEV",
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 62,
+    "title": "This payment plan looks amazing. But here’s the catch.",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Price premium, balloon payments, resale constraints",
+    "requiredSources": [
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 63,
+    "title": "60/40 vs 80/20 payment plan: what actually matters?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Cash-flow schedule + total price + timing",
+    "requiredSources": [
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 64,
+    "title": "Post-handover payment plan: free money or overpriced property?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Price premium vs comparable ready property",
+    "requiredSources": [
+      "DEV",
+      "DLD comps"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 65,
+    "title": "The PSF premium you're paying to buy off-plan",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Off-plan vs ready PSF in same area",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 66,
+    "title": "Off-plan vs ready in the SAME neighbourhood",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Price, rent, yield, liquidity, risk",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 67,
+    "title": "The cheapest new project in [community]",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Current launch/asking PSF",
+    "requiredSources": [
+      "DEV",
+      "LIST"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 68,
+    "title": "The most expensive new project in [community]",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Current launch/asking PSF",
+    "requiredSources": [
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 69,
+    "title": "Projects selling below community average PSF",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Transaction PSF vs area median",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 70,
+    "title": "Projects selling 30% above community PSF — why?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Project premium + brand/product factors",
+    "requiredSources": [
+      "DLD-T",
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 71,
+    "title": "Launch price vs today's transaction price",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Historical brochure price vs DLD trade price",
+    "requiredSources": [
+      "Old brochure",
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 72,
+    "title": "Did early buyers actually make money?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Original launch price vs later resale",
+    "requiredSources": [
+      "DLD-T",
+      "DEV archive"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 73,
+    "title": "How much paper profit does a launch buyer have?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Launch price vs current transacted/secondary price",
+    "requiredSources": [
+      "DEV",
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 74,
+    "title": "Can you actually flip this project before handover?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Pre-handover resale activity + developer rules",
+    "requiredSources": [
+      "DLD-T",
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 75,
+    "title": "How many buyers are already reselling before completion?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Secondary registrations / assignment activity",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 76,
+    "title": "Project popularity vs actual investment performance",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Sales volume + PSF/rent performance",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 77,
+    "title": "The unit type I'd buy inside this project",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Unit mix + rent + price + resale liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 78,
+    "title": "Studio or 1BR in [PROJECT]?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Price, yield, rental demand, resale demand",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 79,
+    "title": "What happens to your ROI when this project hands over?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Expected rent + purchase price + service charge",
+    "requiredSources": [
+      "DLD-R",
+      "DEV",
+      "Mollak",
+      "comps"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 80,
+    "title": "How many competing apartments will hand over around this project?",
+    "category": "Off-Plan Project Analysis",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Nearby project pipeline and units",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 81,
+    "title": "Is Dubai actually facing oversupply?",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Pipeline vs historical completion rate vs demand",
+    "requiredSources": [
+      "DLD-P",
+      "KF"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 82,
+    "title": "X units are scheduled for Dubai — but will they actually arrive?",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Registered pipeline vs delivery materialisation",
+    "requiredSources": [
+      "DLD-P",
+      "KF"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 83,
+    "title": "The communities with the biggest supply risk",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Future units relative to existing stock/demand",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-U",
+      "B"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 84,
+    "title": "JVC has X apartments coming. Should investors worry?",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "JVC pipeline + rents + transaction absorption",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-R",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 85,
+    "title": "Dubai South's supply pipeline explained",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Upcoming projects/units + existing demand",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 86,
+    "title": "Business Bay's upcoming handovers",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Projects/units by expected completion",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 87,
+    "title": "Arjan's upcoming supply problem/opportunity",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Pipeline vs rental/sales demand",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-R",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 88,
+    "title": "Where supply is LOW despite strong demand",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Low pipeline + high transaction/rental activity",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 89,
+    "title": "Villa scarcity vs apartment oversupply",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Pipeline mix by property type",
+    "requiredSources": [
+      "DLD-P",
+      "KF"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 90,
+    "title": "Which communities could see rental pressure after handovers?",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Future units vs current rental demand",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 91,
+    "title": "Scheduled vs actual Dubai handovers",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Expected completion vs actual completion",
+    "requiredSources": [
+      "DLD-P",
+      "KF"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 92,
+    "title": "Which developers actually deliver close to schedule?",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Start/end/completion dates by developer",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 93,
+    "title": "The developers with the biggest pipeline",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Total future projects/units by developer",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 94,
+    "title": "How many homes are being built around your investment?",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Nearby upcoming projects/units",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 95,
+    "title": "Why 100,000 announced units does NOT equal 100,000 delivered units",
+    "category": "Supply / Oversupply",
+    "franchise": null,
+    "analyticalAngle": "Completion/materialisation rate",
+    "requiredSources": [
+      "KF",
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 96,
+    "title": "Dubai's best-selling developers this month",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Transaction count/value by developer",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 97,
+    "title": "Developer A vs Developer B: who sells more?",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Sales count/value, PSF, pipeline",
+    "requiredSources": [
+      "DLD"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 98,
+    "title": "Emaar vs Sobha vs DAMAC on actual numbers",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Sales, price, pipeline, completion history",
+    "requiredSources": [
+      "DLD"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 99,
+    "title": "Azizi's best-selling projects right now",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Sales by Azizi project",
+    "requiredSources": [
+      "OWN",
+      "DLD"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 100,
+    "title": "Which developer sells at the highest PSF?",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Median PSF by developer",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 101,
+    "title": "Which developer offers the lowest entry PSF?",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Median/low-quartile PSF by developer",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 102,
+    "title": "Which developer has the largest upcoming pipeline?",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Projects + units under development",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 103,
+    "title": "Who's delivering projects fastest?",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Completion history vs scheduled dates",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 104,
+    "title": "Developer premium: how much more are you paying for the name?",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Same-area PSF comparison",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 105,
+    "title": "Do branded developers hold resale value better?",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Historical resale PSF / liquidity",
+    "requiredSources": [
+      "Historical DLD"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 106,
+    "title": "Developer launch price vs eventual resale price",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Brochure launch prices + DLD resale",
+    "requiredSources": [
+      "DEV",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 107,
+    "title": "The developer whose buyers are flipping the most",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Pre-handover/secondary resale activity",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 108,
+    "title": "Who actually sells more studios/1BR/2BR?",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Unit-type sales by developer",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 109,
+    "title": "Are small developers automatically riskier? Look at the data.",
+    "category": "Developer Reels",
+    "franchise": null,
+    "analyticalAngle": "Completion history + pipeline/status",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 110,
+    "title": "What AED 1,500/sq ft actually buys you in Dubai",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Communities/projects around target PSF",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 111,
+    "title": "Communities under AED 1,500 PSF",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Median transaction PSF by area",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 112,
+    "title": "Where AED 2,000 PSF is cheap",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Compare target PSF to local premium market",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 113,
+    "title": "The most expensive PSF in Dubai",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Top transaction/project/community PSF",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 114,
+    "title": "Why two buildings 500m apart can differ by 30% in PSF",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Building-level comps + age/quality/view factors",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-U",
+      "B"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 115,
+    "title": "New vs old building PSF premium",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Building creation/completion + transacted PSF",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-U",
+      "B"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 116,
+    "title": "Waterfront vs non-waterfront PSF premium",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Matched-location PSF comparison",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 117,
+    "title": "Metro premium: how much more do properties near Metro sell for?",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Distance/nearest-metro field + PSF",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 118,
+    "title": "Mall premium: does being near Dubai Mall actually show up in price?",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Nearest-mall field + PSF",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 119,
+    "title": "Floor premium: how much does height cost?",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Floor + unit transaction match, where available",
+    "requiredSources": [
+      "DLD-U",
+      "transaction match"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 120,
+    "title": "Studio PSF vs 2BR PSF — why smaller units cost more per foot",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "PSF by room type",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 121,
+    "title": "Project launch at AED X PSF — here are 5 nearby actual sales",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Nearest comparable transactions",
+    "requiredSources": [
+      "DEV",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 122,
+    "title": "Community average PSF is misleading. Here’s the distribution.",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Median, quartiles and spread",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 123,
+    "title": "Median PSF vs average PSF: how averages can mislead buyers",
+    "category": "Price per Square Foot Content",
+    "franchise": null,
+    "analyticalAngle": "Mean vs median + outliers",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 124,
+    "title": "The easiest Dubai communities to resell in",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Transaction velocity / turnover",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 125,
+    "title": "The hardest properties to exit",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Low transaction velocity + thin buyer pool",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 126,
+    "title": "Why ROI doesn’t matter if nobody wants to buy your unit",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Yield + resale liquidity together",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 127,
+    "title": "How many buyers exist at AED 1M vs AED 5M?",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Transaction count by price band",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 128,
+    "title": "The most liquid price band in Dubai",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Transactions by value band",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 129,
+    "title": "Studio vs 1BR: which resells faster?",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Resale transaction volume / holding turnover",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 130,
+    "title": "Villa vs apartment resale liquidity",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Transaction velocity by property type",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 131,
+    "title": "Off-plan projects with an active secondary market",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Secondary/pre-handover transaction count",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 132,
+    "title": "Projects where almost nobody is reselling",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Very low secondary transaction activity",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 133,
+    "title": "High transaction volume doesn’t always mean good investment",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Separate primary launch sales from durable resale/rent demand",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 134,
+    "title": "How I’d measure exit risk before buying a Dubai property",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "Buyer pool + velocity + competing stock + ticket size",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 135,
+    "title": "The 3 numbers every investor should check before buying",
+    "category": "Liquidity / Exit Reels",
+    "franchise": null,
+    "analyticalAngle": "PSF + rents + transaction velocity",
+    "requiredSources": [
+      "OWN"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 136,
+    "title": "Best Dubai investments under AED 750K",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Filter live/recent prices then compare yield/liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DEV",
+      "LIST"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 137,
+    "title": "What AED 1M buys in 5 Dubai communities",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Actual sale comps + current options",
+    "requiredSources": [
+      "DLD-T",
+      "DEV",
+      "LIST"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 138,
+    "title": "Where I’d invest AED 1.5M",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Rank candidates by goal",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DLD-P"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 139,
+    "title": "Where I’d invest AED 2M",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Rank candidates by goal",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DLD-P"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 140,
+    "title": "Where I’d invest AED 3M",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Rank candidates by goal",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "DLD-P"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 141,
+    "title": "What ₹2 crore gets you in Dubai",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Convert budget, show realistic transaction ranges",
+    "requiredSources": [
+      "DLD-T",
+      "DEV",
+      "LIST"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 142,
+    "title": "What ₹3 crore gets you in Dubai",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Convert budget, compare communities/projects",
+    "requiredSources": [
+      "DLD-T",
+      "DEV",
+      "LIST"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 143,
+    "title": "What ₹5 crore gets you in Dubai",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Compare apartment/townhouse/villa options",
+    "requiredSources": [
+      "DLD-T",
+      "DEV",
+      "LIST"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 144,
+    "title": "One AED 2M property or two AED 1M properties?",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Portfolio yield, vacancy diversification, resale",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 145,
+    "title": "Best Dubai property for AED 100K down payment",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Payment plan / mortgage cash requirement",
+    "requiredSources": [
+      "DEV",
+      "LIST",
+      "lender terms where relevant"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 146,
+    "title": "Best property for an investor wanting AED 100K annual rent",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Purchase price needed for target rent",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 147,
+    "title": "What budget do you actually need for a Dubai 1BR?",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Median 1BR sale prices by area",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 148,
+    "title": "Where can AED 1M still buy a 2BR?",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "2BR transacted price filter",
+    "requiredSources": [
+      "DLD-T",
+      "LIST"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 149,
+    "title": "Can AED 2M get you a villa anymore?",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Villa/townhouse price filter",
+    "requiredSources": [
+      "DLD-T",
+      "LIST"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 150,
+    "title": "AED 5M: apartment, townhouse or villa?",
+    "category": "Budget-Based Reels",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Risk/return comparison by property type",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 151,
+    "title": "Dubai added X residents — where will they live?",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Population growth + rental/supply geography",
+    "requiredSources": [
+      "DDSE",
+      "DLD"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 152,
+    "title": "Can Dubai build homes fast enough for its population growth?",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Population growth vs completions/pipeline",
+    "requiredSources": [
+      "DDSE",
+      "DLD-P"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 153,
+    "title": "Population growth vs housing supply",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "New residents vs net delivered units",
+    "requiredSources": [
+      "DDSE",
+      "DLD-P"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 154,
+    "title": "Does Dubai actually need all these new apartments?",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Population/demand vs pipeline",
+    "requiredSources": [
+      "DDSE",
+      "DLD"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 155,
+    "title": "Why population growth doesn’t automatically mean your project will rise",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "City demand vs project-level supply/liquidity",
+    "requiredSources": [
+      "DDSE",
+      "DLD-P",
+      "DLD-T"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 156,
+    "title": "Which communities benefit most from Dubai’s growth corridors?",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Master-plan growth areas + local market data",
+    "requiredSources": [
+      "Dubai 2040",
+      "DLD"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 157,
+    "title": "Dubai’s 2040 plan explained for property investors",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Urban centres, transit, density, public realm",
+    "requiredSources": [
+      "Dubai 2040"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 158,
+    "title": "Where Dubai wants people to live by 2040",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Growth centres + housing/transit plan",
+    "requiredSources": [
+      "Dubai 2040"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 159,
+    "title": "The 20-minute-city plan and what it could mean for property",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Transit/walkability targets + nearby markets",
+    "requiredSources": [
+      "Dubai 2040"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 160,
+    "title": "Infrastructure projects that could change property values",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Official roads/Metro/infrastructure projects",
+    "requiredSources": [
+      "RTA",
+      "Dubai Media Office"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 161,
+    "title": "What Dubai’s new roads could mean for these communities",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Access improvements + before/after data",
+    "requiredSources": [
+      "RTA",
+      "DLD"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 162,
+    "title": "Metro expansion: which communities stand to benefit?",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Official station/route plans + local pricing",
+    "requiredSources": [
+      "RTA",
+      "DLD"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 163,
+    "title": "Buying near future infrastructure: smart or already priced in?",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Announcement date vs PSF changes",
+    "requiredSources": [
+      "RTA",
+      "DLD-T"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 164,
+    "title": "Before-and-after property prices around a new transport link",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Historical PSF around project timeline",
+    "requiredSources": [
+      "Historical DLD",
+      "RTA"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 165,
+    "title": "Which communities are becoming more accessible?",
+    "category": "Population / Demand / Macro Reels",
+    "franchise": null,
+    "analyticalAngle": "Travel-time/access changes + market metrics",
+    "requiredSources": [
+      "RTA",
+      "maps",
+      "DLD"
+    ],
+    "outputType": "trend"
+  },
+  {
+    "id": 166,
+    "title": "Project PSF",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Record current project/launch PSF",
+    "requiredSources": [
+      "DEV",
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 167,
+    "title": "Community median PSF",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Benchmark the project against the local market",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 168,
+    "title": "Nearby ready PSF",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Compare against income-producing completed stock",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 169,
+    "title": "Nearby off-plan PSF",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Compare against direct new-build competition",
+    "requiredSources": [
+      "DLD-T",
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 170,
+    "title": "Expected rent",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Estimate from actual comparable rental contracts",
+    "requiredSources": [
+      "DLD-R"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 171,
+    "title": "Gross yield",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Expected annual rent / purchase price",
+    "requiredSources": [
+      "Calculate from DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 172,
+    "title": "Service charge",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Add recurring building cost",
+    "requiredSources": [
+      "Mollak",
+      "DLD-RERA"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 173,
+    "title": "Competing supply",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Count future units/projects nearby",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 174,
+    "title": "Transaction liquidity",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Measure buyer depth / transaction velocity",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 175,
+    "title": "Payment plan",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Map payment timing and cash-flow burden",
+    "requiredSources": [
+      "DEV"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 176,
+    "title": "Handover",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Verify official/registered expected completion",
+    "requiredSources": [
+      "DEV",
+      "DLD-P"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 177,
+    "title": "Developer delivery record",
+    "category": "\"Is This Project Overpriced?\" Repeatable Series",
+    "franchise": "Would I Buy It?",
+    "analyticalAngle": "Compare scheduled vs actual completion history",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "project_analysis"
+  },
+  {
+    "id": 178,
+    "title": "If I had AED 1M today, here’s where I’d look",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Budget filter + goal-based ranking",
+    "requiredSources": [
+      "OWN",
+      "DLD"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 179,
+    "title": "If my only goal was rental income",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Rank by sustainable net yield + demand",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "Mollak"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 180,
+    "title": "If my only goal was capital appreciation",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Price growth + scarcity + demand + supply",
+    "requiredSources": [
+      "Historical DLD",
+      "DLD-P"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 181,
+    "title": "If I needed to exit in 3 years",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Liquidity + ticket size + future competing supply",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-P"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 182,
+    "title": "If I wanted a property below AED 1,500 PSF",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "PSF filter + quality/liquidity screen",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 183,
+    "title": "If I wanted a 1BR under AED 1.2M",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "1BR price filter + rent/liquidity",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 184,
+    "title": "If I wanted a villa under AED 3M",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Villa/townhouse price filter",
+    "requiredSources": [
+      "DLD-T",
+      "LIST"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 185,
+    "title": "If I wanted a property near the Metro",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Nearest Metro / access + market metrics",
+    "requiredSources": [
+      "DLD-T",
+      "RTA"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 186,
+    "title": "If I wanted the safest developer possible",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Completion history + project status + track record",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 187,
+    "title": "If I wanted the highest yield possible",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Yield + liquidity + service charge screen",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "Mollak"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 188,
+    "title": "If I wanted low upcoming supply",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Low future units relative to stock/demand",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-U",
+      "B"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 189,
+    "title": "If I wanted a payment plan instead of a mortgage",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Developer payment plans + price premium",
+    "requiredSources": [
+      "DEV",
+      "DLD comps"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 190,
+    "title": "If I had ₹3 crore and lived in India",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Budget conversion + transaction comps + practical ownership costs",
+    "requiredSources": [
+      "DLD",
+      "DEV",
+      "official fee sources"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 191,
+    "title": "If I were buying my first Dubai investment",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Simple scorecard: price, rent, liquidity, supply, developer",
+    "requiredSources": [
+      "OWN",
+      "DLD"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 192,
+    "title": "If I already owned two Dubai apartments",
+    "category": "\"What Would I Buy?\" Series",
+    "franchise": "Where Would I Put AED X?",
+    "analyticalAngle": "Diversification by area/product/risk",
+    "requiredSources": [
+      "OWN",
+      "DLD"
+    ],
+    "outputType": "budget_analysis"
+  },
+  {
+    "id": 193,
+    "title": "“Dubai property always goes up.” No.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Historical cycles / area-level data",
+    "requiredSources": [
+      "Historical DLD"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 194,
+    "title": "“Off-plan is always cheaper.” Let’s test it.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Off-plan vs ready PSF in same micro-market",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 195,
+    "title": "“Ready property gives better ROI.” Let’s test it.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Ready vs off-plan/estimated yield",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 196,
+    "title": "“Studios give the best ROI.” Not everywhere.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Yield by unit type and area",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 197,
+    "title": "“JVC is oversupplied.” Here’s what the data actually says.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Pipeline + absorption + rents",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 198,
+    "title": "“Dubai has 160,000 homes coming.” That’s not the full story.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Registered pipeline vs expected materialisation",
+    "requiredSources": [
+      "KF",
+      "DLD-P"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 199,
+    "title": "“8% rental return.” Before you believe the brochure…",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Gross vs net yield from real comps/costs",
+    "requiredSources": [
+      "DLD",
+      "Mollak"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 200,
+    "title": "“Buying near Metro guarantees appreciation.” Let’s test it.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Historical PSF vs proximity/access",
+    "requiredSources": [
+      "DLD",
+      "RTA"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 201,
+    "title": "“Big developers always outperform.” Let’s test it.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Resale, PSF growth, completion history",
+    "requiredSources": [
+      "DLD"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 202,
+    "title": "“Luxury property is a bad rental investment.”",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Luxury rent/yield/liquidity data",
+    "requiredSources": [
+      "DLD",
+      "KF"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 203,
+    "title": "“You need millions to invest in Dubai.”",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Actual transaction distribution and low-ticket options",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 204,
+    "title": "“Payment plans make a property cheaper.” No — financing and price are different things.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Payment schedule vs purchase-price premium",
+    "requiredSources": [
+      "DEV",
+      "DLD comps"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 205,
+    "title": "“Low PSF = cheap property.” Not necessarily.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Total ticket, rent, quality, liquidity",
+    "requiredSources": [
+      "DLD"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 206,
+    "title": "“High transaction volume means strong demand.” Not always.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Primary launch concentration vs resale/rental depth",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 207,
+    "title": "“Dubai is about to crash because of supply.” Let’s look at delivery rates.",
+    "category": "Myth-Busting Reels",
+    "franchise": "Dubai Myth vs Data",
+    "analyticalAngle": "Pipeline + historic on-time/materialisation rates",
+    "requiredSources": [
+      "DLD-P",
+      "KF"
+    ],
+    "outputType": "myth_test"
+  },
+  {
+    "id": 208,
+    "title": "Most rented building in JVC",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Rank rental contracts by project/building",
+    "requiredSources": [
+      "OWN",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 209,
+    "title": "Most traded building in Business Bay",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Rank transaction count by building/project",
+    "requiredSources": [
+      "OWN",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 210,
+    "title": "Highest transaction velocity in Dubai Marina",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Sales frequency / stock proxy",
+    "requiredSources": [
+      "OWN",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 211,
+    "title": "Cheapest PSF within 1 km of Downtown",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Geographic filter + transacted PSF",
+    "requiredSources": [
+      "DLD-T",
+      "maps"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 212,
+    "title": "Most expensive studio transactions",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Studio deals ranked by total price / PSF",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 213,
+    "title": "Biggest spread between studio and 1BR PSF",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "PSF gap by project/community",
+    "requiredSources": [
+      "OWN",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 214,
+    "title": "Community where rents rose but prices didn’t",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Rent growth minus sale-price growth",
+    "requiredSources": [
+      "OWN",
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 215,
+    "title": "Community where prices rose but rents didn’t",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Sale-price growth minus rent growth",
+    "requiredSources": [
+      "OWN",
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 216,
+    "title": "Community where yields are compressing fastest",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Rent growth vs price growth",
+    "requiredSources": [
+      "OWN",
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 217,
+    "title": "Projects with lots of sales but almost zero completed rental history",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Primary sales volume + lack of rent comps",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 218,
+    "title": "Projects with surprisingly strong secondary sales",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Secondary transaction activity",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 219,
+    "title": "Developers with the most projects under construction",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Count/value/units of active projects",
+    "requiredSources": [
+      "DLD-P"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 220,
+    "title": "Areas with the highest ratio of future supply to existing stock",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Upcoming units / existing unit base",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-U",
+      "B"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 221,
+    "title": "Areas with the lowest supply pressure",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Low upcoming units relative to stock/demand",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-U",
+      "B"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 222,
+    "title": "Buildings where rents are substantially above community averages",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Building rent premium",
+    "requiredSources": [
+      "DLD-R"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 223,
+    "title": "Buildings trading substantially below community PSF",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Building transaction discount",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 224,
+    "title": "Where buyers are paying the highest premium for new construction",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "New-build vs older stock PSF premium",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-U",
+      "B"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 225,
+    "title": "Difference between advertised price and actual transaction price",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Listing ask vs nearest actual sale",
+    "requiredSources": [
+      "LIST",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 226,
+    "title": "Properties being listed at AED X but actually selling at AED Y",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Asking-to-sale gap",
+    "requiredSources": [
+      "LIST",
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 227,
+    "title": "The most common apartment size being bought in Dubai",
+    "category": "\"The Data Nobody Shows You\" Series",
+    "franchise": "The Data Nobody Shows You",
+    "analyticalAngle": "Transaction count by room/size band",
+    "requiredSources": [
+      "DLD-T"
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 228,
+    "title": "Which Dubai communities are Indian buyers choosing most?",
+    "category": "Supplementary Ideas",
+    "franchise": null,
+    "analyticalAngle": "Use only when a trustworthy source actually publishes buyer-nationality data. Never infer nationality from names.",
+    "requiredSources": [
+      "Official DLD",
+      "government publications or credible reports with explicit nationality breakdowns."
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 229,
+    "title": "The hidden cost of buying a Dubai apartment",
+    "category": "Supplementary Ideas",
+    "franchise": null,
+    "analyticalAngle": "DLD fee, trustee, agency, mortgage registration/valuation where applicable, service charges and other recurring ownership costs.",
+    "requiredSources": [
+      "DLD",
+      "RERA official fees",
+      "lender schedules",
+      "Mollak."
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 230,
+    "title": "Are advertised rental yields actually real?",
+    "category": "Supplementary Ideas",
+    "franchise": null,
+    "analyticalAngle": "Compare marketing/portal ROI to actual registered rent and transaction prices; then show gross vs net.",
+    "requiredSources": [
+      "DLD-T",
+      "DLD-R",
+      "Mollak",
+      "Bayut",
+      "PF as comparison only."
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 231,
+    "title": "Scheduled handovers vs actual deliveries — developer by developer",
+    "category": "Supplementary Ideas",
+    "franchise": null,
+    "analyticalAngle": "Build a completion-reliability score using expected and actual completion dates.",
+    "requiredSources": [
+      "DLD-P",
+      "independent research such as Knight Frank",
+      "REIDIN."
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 232,
+    "title": "What happens when 20,000 new units enter one community?",
+    "category": "Supplementary Ideas",
+    "franchise": null,
+    "analyticalAngle": "Explain supply → tenant choice → rent competition → resale competition, using one real community case study.",
+    "requiredSources": [
+      "DLD-P",
+      "DLD-R",
+      "DLD-T."
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 233,
+    "title": "Projects with attractive payment plans but questionable resale economics",
+    "category": "Supplementary Ideas",
+    "franchise": null,
+    "analyticalAngle": "Compare payment-plan convenience against price premium, nearby resale comps and exit liquidity.",
+    "requiredSources": [
+      "DEV",
+      "DLD-T."
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 234,
+    "title": "What can AED 1M / 2M / 3M actually buy today — asking price vs sold price",
+    "category": "Supplementary Ideas",
+    "franchise": null,
+    "analyticalAngle": "Put active listings beside recent actual transactions to show the negotiation/asking gap.",
+    "requiredSources": [
+      "LIST",
+      "DLD-T."
+    ],
+    "outputType": "ranking"
+  },
+  {
+    "id": 235,
+    "title": "Is this project’s AED X PSF expensive for its micro-market?",
+    "category": "Supplementary Ideas",
+    "franchise": null,
+    "analyticalAngle": "Compare against community median, nearest ready, nearest off-plan and rent-supported value.",
+    "requiredSources": [
+      "DEV",
+      "DLD-T",
+      "DLD-R."
+    ],
+    "outputType": "ranking"
+  }
+]

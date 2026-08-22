@@ -39,7 +39,7 @@ def signals(period: str = "90d", limit_per_category: int = 5, con=Depends(db)):
             WHERE fr.registration_date BETWEEN ? AND ? AND fr.canonical_bedroom NOT IN ('Unknown', 'Other')
             GROUP BY 1, 2
         )
-        SELECT t.community_name, b.canonical_bedroom, b.c, t.total
+        SELECT t.community_name, t.community_key, b.canonical_bedroom, b.c, t.total
         FROM by_bed b JOIN totals t ON b.community_key = t.community_key
         WHERE t.total >= ?
         ORDER BY (b.c * 1.0 / t.total) DESC
@@ -47,14 +47,14 @@ def signals(period: str = "90d", limit_per_category: int = 5, con=Depends(db)):
         [window.current_start, window.current_end, window.current_start, window.current_end, MIN_SAMPLE],
     ).fetchall()
     count = 0
-    for name, bedroom, c, total in rows:
+    for name, community_key, bedroom, c, total in rows:
         share = round(100 * c / total, 1)
         if share < DOMINANT_SHARE_THRESHOLD:
             continue
         out.append({
             "category": "dominant_unit_demand",
             "text": f"{bedroom} apartments accounted for {share}% of rental contracts in {name} over the last {window.label}.",
-            "evidence": {"community": name, "bedroom": bedroom, "count": c, "total": total, "share_pct": share},
+            "evidence": {"community": name, "community_key": community_key, "bedroom": bedroom, "count": c, "total": total, "share_pct": share},
         })
         count += 1
         if count >= limit_per_category:
@@ -72,22 +72,22 @@ def signals(period: str = "90d", limit_per_category: int = 5, con=Depends(db)):
             FROM fact_rentals fr JOIN dim_area da ON fr.area_id = da.area_id
             WHERE fr.registration_date BETWEEN ? AND ? GROUP BY 1
         )
-        SELECT cur.community_name, cur.c, COALESCE(prev.c, 0)
+        SELECT cur.community_name, cur.community_key, cur.c, COALESCE(prev.c, 0)
         FROM cur LEFT JOIN prev ON cur.community_key = prev.community_key
         WHERE cur.c >= ?
         """,
         [window.current_start, window.current_end, window.previous_start, window.previous_end, MIN_SAMPLE],
     ).fetchall()
     scored = []
-    for name, cur_c, prev_c in growth_rows:
+    for name, community_key, cur_c, prev_c in growth_rows:
         change = pct_change(cur_c, prev_c)
         if change is not None and change >= RENTAL_GROWTH_THRESHOLD:
-            scored.append((change, name, cur_c, prev_c))
-    for change, name, cur_c, prev_c in sorted(scored, reverse=True)[:limit_per_category]:
+            scored.append((change, name, community_key, cur_c, prev_c))
+    for change, name, community_key, cur_c, prev_c in sorted(scored, reverse=True)[:limit_per_category]:
         out.append({
             "category": "rental_activity_growth",
             "text": f"Rental activity in {name} increased {change:.0f}% compared with the previous {window.label} period.",
-            "evidence": {"community": name, "current_count": cur_c, "previous_count": prev_c, "change_pct": change},
+            "evidence": {"community": name, "community_key": community_key, "current_count": cur_c, "previous_count": prev_c, "change_pct": change},
         })
 
     # 3. Project momentum (current period vs trailing 6-month monthly average).
@@ -151,7 +151,7 @@ def signals(period: str = "90d", limit_per_category: int = 5, con=Depends(db)):
             FROM fact_sales fs JOIN dim_area da ON fs.area_id = da.area_id
             WHERE fs.instance_date BETWEEN ? AND ? AND fs.group_en = 'Sales' GROUP BY 1
         )
-        SELECT cur_rent.community_name, cur_rent.canonical_bedroom, cur_rent.mr, prev_rent.mr, cur_rent.c, prev_rent.c,
+        SELECT cur_rent.community_name, cur_rent.community_key, cur_rent.canonical_bedroom, cur_rent.mr, prev_rent.mr, cur_rent.c, prev_rent.c,
                cur_psf.mp, prev_psf.mp
         FROM cur_rent
         JOIN prev_rent ON cur_rent.community_key = prev_rent.community_key AND cur_rent.canonical_bedroom = prev_rent.canonical_bedroom
@@ -165,18 +165,18 @@ def signals(period: str = "90d", limit_per_category: int = 5, con=Depends(db)):
         ],
     ).fetchall()
     scored2 = []
-    for name, bedroom, cur_rent, prev_rent, cur_c, prev_c, cur_psf, prev_psf in rent_vs_psf:
+    for name, community_key, bedroom, cur_rent, prev_rent, cur_c, prev_c, cur_psf, prev_psf in rent_vs_psf:
         rent_change = pct_change(cur_rent, prev_rent)
         psf_change = pct_change(cur_psf, prev_psf)
         if rent_change is None or psf_change is None:
             continue
         if rent_change >= RENT_GROWTH_THRESHOLD and abs(psf_change) <= PSF_FLAT_BAND:
-            scored2.append((rent_change, name, bedroom, rent_change, psf_change))
-    for rent_change, name, bedroom, rc, pc in sorted(scored2, reverse=True)[:limit_per_category]:
+            scored2.append((rent_change, name, community_key, bedroom, rent_change, psf_change))
+    for rent_change, name, community_key, bedroom, rc, pc in sorted(scored2, reverse=True)[:limit_per_category]:
         out.append({
             "category": "rent_growth_flat_price",
             "text": f"Average rent for {bedroom} apartments in {name} rose {rc:.1f}% while transaction PSF remained broadly unchanged ({pc:+.1f}%).",
-            "evidence": {"community": name, "bedroom": bedroom, "rent_change_pct": rc, "psf_change_pct": pc},
+            "evidence": {"community": name, "community_key": community_key, "bedroom": bedroom, "rent_change_pct": rc, "psf_change_pct": pc},
         })
 
     # 5. Supply vs demand imbalance (only where a scraped profile exists).
@@ -207,7 +207,7 @@ def signals(period: str = "90d", limit_per_category: int = 5, con=Depends(db)):
             out.append({
                 "category": "supply_demand_imbalance",
                 "text": f"{area_name} has approximately {int(incoming_units):,} units scheduled for future delivery relative to only {int(annualized):,} observed annualized rental contracts.",
-                "evidence": {"area": area_name, "incoming_units": incoming_units, "annualized_rental_demand": annualized, "risk": risk["risk"], "ratio": risk["ratio"]},
+                "evidence": {"area": area_name, "community_key": community_key, "incoming_units": incoming_units, "annualized_rental_demand": annualized, "risk": risk["risk"], "ratio": risk["ratio"]},
             })
             added5 += 1
             if added5 >= limit_per_category:

@@ -8,24 +8,21 @@
  * a real API response; a metric that isn't available renders as `null` and
  * the UI shows "Data unavailable" rather than inventing a value.
  *
- * DISPLAY LIMITS vs REAL COUNTS: fetchChildren() returns the full real set
- * (bounded only by a generous safety cap — API_FETCH_CAP — to protect
- * request size, not a UX choice). Dubai has 92 real top-level areas in the
- * database; nothing here claims otherwise. How many of those are actually
- * RENDERED at once is a separate, UI-layer decision made by
- * IntelligenceMap.tsx (MAX_VISIBLE_* there), which also renders a "+N more"
- * node whenever totalAvailable exceeds what's shown — so the cap always
- * reads as progressive disclosure, never as "this is the whole dataset."
+ * NO DISPLAY CAPS: fetchChildren() returns every real node at a level —
+ * Dubai's full 92 areas, every real sub-area/project under an area, etc.
+ * API_FETCH_CAP below is a request-size safety guard only (protects
+ * against a pathological result set), not a UX truncation; the 3D graph
+ * is expected to render the whole real set at once and let the camera
+ * (zoom/orbit) do the work a "+N more" placeholder used to do in 2D.
  */
 import { api, type AreaChildItem, type AreaListItem, type AreaProjectItem, type MasterProjectDetail } from "./api";
 import { formatAed, formatNumber, formatPct, formatPsf } from "./format";
 
 export type GraphNodeType = "market" | "area" | "project" | "building" | "unitType" | "developer";
 
-/** How many real nodes fetchChildren() pulls per level before stopping —
- * purely a request-size guard (these datasets can be large), NOT a display
- * limit. IntelligenceMap.tsx decides how many of these to actually render. */
-const API_FETCH_CAP = 40;
+/** Request-size safety guard only — not a display limit. Dubai's 92 areas
+ * fit comfortably under this; per-area project counts do too in practice. */
+const API_FETCH_CAP = 150;
 
 export interface GraphMetric {
   label: string;

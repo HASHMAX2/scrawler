@@ -30,6 +30,7 @@ const NAV_SECTIONS: { title: string; items: { to: string; label: string }[] }[] 
     title: "Intelligence",
     items: [
       { to: "/intelligence-map", label: "Intelligence Map" },
+      { to: "/reels", label: "Reels" },
       { to: "/opportunities", label: "Opportunities" },
       { to: "/signals", label: "Market Signals" },
       { to: "/compare", label: "Compare" },

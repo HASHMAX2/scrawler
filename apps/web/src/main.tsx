@@ -28,6 +28,8 @@ import { ConstructionWatch } from "./pages/ConstructionWatch";
 import { Opportunities } from "./pages/Opportunities";
 import { MarketSignals } from "./pages/MarketSignals";
 import { DecisionEngine } from "./pages/DecisionEngine";
+import { Reels } from "./pages/Reels";
+import { ReelWorkspace } from "./pages/ReelWorkspace";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: 1 } } });
 
@@ -58,6 +60,8 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/opportunities" element={<Opportunities />} />
               <Route path="/signals" element={<MarketSignals />} />
               <Route path="/decision-engine" element={<DecisionEngine />} />
+              <Route path="/reels" element={<Reels />} />
+              <Route path="/reels/:id" element={<ReelWorkspace />} />
               <Route path="/map" element={<MapPage />} />
               <Route path="/explorer" element={<Explorer />} />
               <Route path="/import" element={<ImportData />} />

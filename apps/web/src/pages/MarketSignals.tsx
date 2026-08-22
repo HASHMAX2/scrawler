@@ -1,7 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { api, type MarketSignal } from "../lib/api";
 import { useFilters } from "../state/FilterContext";
 import { Card, EmptyState, ErrorState, LoadingSkeleton, SignalBadge } from "../components/ui";
+
+/** Signal text is generated server-side with the exact entity name (area,
+ * sub-area or community) interpolated verbatim into the sentence — e.g.
+ * "...rental contracts in Al Yufrah 2 over the last 90d." Splitting on that
+ * exact substring turns just the entity name into a link to its community
+ * page, without needing to parse the sentence structure. */
+function SignalText({ signal }: { signal: MarketSignal }) {
+  const name = signal.evidence.community ?? signal.evidence.area;
+  const key = signal.evidence.community_key;
+  if (!name || !key || !signal.text.includes(name)) return <>{signal.text}</>;
+  const idx = signal.text.indexOf(name);
+  const before = signal.text.slice(0, idx);
+  const after = signal.text.slice(idx + name.length);
+  return (
+    <>
+      {before}
+      <Link to={`/communities/${encodeURIComponent(key)}`} className="text-[var(--accent)] hover:underline font-medium">
+        {name}
+      </Link>
+      {after}
+    </>
+  );
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   dominant_unit_demand: "Dominant Unit Demand",
@@ -55,7 +79,7 @@ export function MarketSignals() {
           <ul className="space-y-3">
             {signalsList.map((s, i) => (
               <li key={i} className="text-sm border-l-2 border-[var(--accent)] pl-3">
-                {s.text}
+                <SignalText signal={s} />
               </li>
             ))}
           </ul>

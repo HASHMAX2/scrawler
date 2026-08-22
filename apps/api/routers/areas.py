@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 
 from apps.api.analytics.core import estimated_gross_yield, resolve_period
@@ -125,24 +126,128 @@ def list_top_level_areas(period: str = "90d", con=Depends(db)):
     DLD reports at the broad community grain, not per sub-district, so a
     single sub-area's own numbers are usually near-zero; the subtree rollup
     is where the real signal lives.
+
+    Originally built as a per-root loop (_subtree_ids + _rollup_stats +
+    _child_count + _project_matched_stats, ~6 queries x 92 roots = ~550
+    sequential round trips against fact_sales/fact_rentals) — that took
+    ~17s per request. Since the area tree is a strict partition (every
+    scraped area belongs to exactly one top-level root), the whole thing
+    collapses into: one read of the tree to compute root membership in
+    Python, then one GROUP-BY query per fact table joined against that
+    membership map. Same response shape, ~5 queries total instead of ~550.
     """
     window = resolve_period(con, period)
-    roots = con.execute(
-        """
-        SELECT id, name, hero_image_url, also_known_as FROM scraped.areas
-        WHERE parent_area_name = 'Dubai' AND area_type = 'community'
-        ORDER BY name
-        """
+    all_areas = con.execute(
+        "SELECT id, name, parent_area_name, area_type, hero_image_url, also_known_as FROM scraped.areas"
     ).fetchall()
+    by_parent: dict[str, list[tuple]] = {}
+    for row in all_areas:
+        by_parent.setdefault(row[2], []).append(row)
+
+    roots = sorted(
+        (r for r in by_parent.get("Dubai", []) if r[3] == "community"),
+        key=lambda r: r[1],
+    )
+
+    root_of: dict[int, int] = {}
+    subtree_size: dict[int, int] = {}
+    child_count: dict[int, int] = {}
+    for root_id, root_name, *_ in roots:
+        child_count[root_id] = sum(1 for c in by_parent.get(root_name, []) if c[3] == "community")
+        stack: list[tuple[int, str, int]] = [(root_id, root_name, 0)]
+        count = 0
+        while stack:
+            aid, aname, depth = stack.pop()
+            root_of[aid] = root_id
+            count += 1
+            if depth >= MAX_DEPTH:
+                continue
+            for child in by_parent.get(aname, []):
+                if child[3] == "community":
+                    stack.append((child[0], child[1], depth + 1))
+        subtree_size[root_id] = count
+
+    root_map_df = pd.DataFrame(list(root_of.items()), columns=["scraped_area_id", "root_area_id"])
+    con.register("_root_map", root_map_df)
+    try:
+        sales_by_root = {
+            r[0]: r[1:]
+            for r in con.execute(
+                """
+                SELECT rm.root_area_id, count(*), sum(fs.trans_value_aed), median(fs.trans_value_aed)
+                FROM fact_sales fs
+                JOIN dim_area da ON fs.area_id = da.area_id
+                JOIN _root_map rm ON da.scraped_area_id = rm.scraped_area_id
+                WHERE fs.instance_date BETWEEN ? AND ? AND fs.group_en = 'Sales'
+                GROUP BY 1
+                """,
+                [window.current_start, window.current_end],
+            ).fetchall()
+        }
+        rentals_by_root = {
+            r[0]: r[1:]
+            for r in con.execute(
+                """
+                SELECT rm.root_area_id, count(*), median(fr.annual_amount_aed)
+                FROM fact_rentals fr
+                JOIN dim_area da ON fr.area_id = da.area_id
+                JOIN _root_map rm ON da.scraped_area_id = rm.scraped_area_id
+                WHERE fr.registration_date BETWEEN ? AND ?
+                GROUP BY 1
+                """,
+                [window.current_start, window.current_end],
+            ).fetchall()
+        }
+        proj_sales_by_root = {
+            r[0]: r[1:]
+            for r in con.execute(
+                """
+                SELECT rm.root_area_id, count(*), sum(fs.trans_value_aed), median(fs.trans_value_aed)
+                FROM fact_sales fs
+                JOIN dim_project dp ON fs.project_id = dp.project_id
+                JOIN scraped.developments d ON dp.matched_development_id = d.id
+                JOIN _root_map rm ON d.area_id = rm.scraped_area_id
+                WHERE fs.instance_date BETWEEN ? AND ? AND fs.group_en = 'Sales'
+                GROUP BY 1
+                """,
+                [window.current_start, window.current_end],
+            ).fetchall()
+        }
+        proj_rentals_by_root = {
+            r[0]: r[1:]
+            for r in con.execute(
+                """
+                SELECT rm.root_area_id, count(*), median(fr.annual_amount_aed)
+                FROM fact_rentals fr
+                JOIN dim_project dp ON fr.project_id = dp.project_id
+                JOIN scraped.developments d ON dp.matched_development_id = d.id
+                JOIN _root_map rm ON d.area_id = rm.scraped_area_id
+                WHERE fr.registration_date BETWEEN ? AND ?
+                GROUP BY 1
+                """,
+                [window.current_start, window.current_end],
+            ).fetchall()
+        }
+    finally:
+        con.unregister("_root_map")
+
     items = []
-    for area_id, name, hero, aka in roots:
-        subtree = _subtree_ids(con, area_id)
-        stats = _rollup_stats(con, subtree, window)
+    for area_id, name, _parent, _atype, hero, aka in roots:
+        s = sales_by_root.get(area_id, (0, None, None))
+        r = rentals_by_root.get(area_id, (0, None))
+        ps = proj_sales_by_root.get(area_id, (0, None, None))
+        pr = proj_rentals_by_root.get(area_id, (0, None))
         items.append({
             "area_id": area_id, "name": name, "hero_image_url": hero, "also_known_as": aka,
-            "child_count": _child_count(con, name), "descendant_count": len(subtree) - 1,
-            "project_matched_stats": _project_matched_stats(con, subtree, window),
-            **stats,
+            "child_count": child_count[area_id], "descendant_count": subtree_size[area_id] - 1,
+            "project_matched_stats": {
+                "sales_count": ps[0], "sales_value": ps[1], "median_price": ps[2],
+                "rental_count": pr[0], "median_rent": pr[1],
+                "estimated_gross_yield_pct": estimated_gross_yield(pr[1], ps[2]),
+            },
+            "sales_count": s[0], "sales_value": s[1], "median_price": s[2],
+            "rental_count": r[0], "median_rent": r[1],
+            "estimated_gross_yield_pct": estimated_gross_yield(r[1], s[2]),
         })
     items.sort(key=lambda x: x["sales_count"] + x["rental_count"], reverse=True)
     return {"period": window.label, "items": items}

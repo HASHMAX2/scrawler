@@ -97,7 +97,8 @@ export interface LivabilityPanel {
 }
 
 export interface CommunityDetail {
-  community_key: string; community_name: string; has_scraped_profile: boolean; period: string;
+  community_key: string; community_name: string; has_scraped_profile: boolean;
+  data_source: "dld_direct" | "project_matched"; period: string;
   sales: { count: number; value: number | null; median_price: number | null; median_psf: number | null; confidence: string };
   rentals: { count: number; median_rent: number | null; renewals: number | null; new_contracts: number | null; confidence: string };
   estimated_gross_yield_pct: number | null;
@@ -229,7 +230,10 @@ export interface PulseResponse {
   developer_momentum: DeveloperMomentumItem[];
 }
 
-export interface MarketSignal { category: string; text: string; evidence: Record<string, unknown> }
+export interface MarketSignal {
+  category: string; text: string;
+  evidence: Record<string, unknown> & { community?: string; community_key?: string; area?: string; project?: string };
+}
 export interface SignalsResponse { period: string; min_sample: number; signals: MarketSignal[] }
 
 export interface DecisionEngineResult {
@@ -344,6 +348,41 @@ export interface MasterProjectDetail {
   data_quality: { grouping_method_summary: Record<string, number>; matched_scraped_buildings: number; total_buildings: number };
 }
 
+export interface ReelMetric {
+  label: string; value: number | string | null; format: string; tone?: string | null; note?: string | null;
+}
+export interface ReelBreakdownRow { label: string; value: number | string | null; secondary?: number | null }
+export interface ReelEntity {
+  id: string; label: string; subtitle?: string | null; metrics: ReelMetric[];
+  sampleSize: { sales: number; rentals: number };
+  breakdown?: Record<string, ReelBreakdownRow[]>;
+}
+export interface ReelVerdictRow { dimension: string; winner: string | null; detail: string }
+export interface ReelManifestItem {
+  id: number; title: string; category: string; franchise: string | null;
+  analyticalAngle: string; requiredSources: string[]; outputType: string; resolver: string;
+  status: "ready" | "partial" | "external"; missingSources: string[]; sourceLabels: string[];
+}
+export interface ReelListResponse {
+  total: number; filtered: number;
+  counts: { ready: number; partial: number; external: number };
+  categories: { name: string; count: number; readyCount: number }[];
+  items: ReelManifestItem[];
+}
+export interface ReelFranchise { name: string; description: string; count: number; readyCount: number }
+export interface ReelRunResult {
+  reel: ReelManifestItem; status: string; question: string; period: string;
+  entities: ReelEntity[]; verdict: ReelVerdictRow[] | null;
+  reelReadyFacts: string[]; whatIsInteresting: string | null; caveat: string; sources: string[];
+  priceBandDepth?: ReelBreakdownRow[];
+  availableProjects?: string[];
+  claim?: string;
+}
+export interface ReadyToMakeCard {
+  finding: string; entity: string | null; communityKey: string | null; magnitude: number;
+  suggestedReels: { id: number; title: string; category: string; status: string }[];
+}
+
 export const api = {
   overview: (period: string, community_key?: string) => get<Overview>("/overview", { period, community_key }),
   communities: (period: string, page: number, page_size: number, sort?: string, search?: string) =>
@@ -388,6 +427,12 @@ export const api = {
   areaDetail: (areaId: number | string, period: string) => get<AreaDetailResponse>(`/areas/${areaId}`, { period }),
   areaProjects: (areaId: number | string, period: string, limit = 12) =>
     get<AreaProjectsResponse>(`/areas/${areaId}/projects`, { period, limit }),
+  reels: (params: { category?: string; franchise?: string; status?: string; source?: string; output?: string; search?: string }) =>
+    get<ReelListResponse>("/reels", params),
+  reelFranchises: () => get<{ items: ReelFranchise[] }>("/reels/franchises"),
+  reelDetail: (id: number) => get<ReelManifestItem>(`/reels/${id}`),
+  runReel: (id: number, params: Record<string, string | number | undefined>) => get<ReelRunResult>(`/reels/${id}/run`, params),
+  readyToMake: (period: string, limit = 12) => get<{ period: string; items: ReadyToMakeCard[] }>("/reels/meta/opportunities", { period, limit }),
 };
 
 export async function refreshData(): Promise<unknown> {

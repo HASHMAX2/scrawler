@@ -26,6 +26,28 @@ export function formatPsf(value: number | null | undefined): string {
   return `AED ${value.toFixed(0)}/sqft`;
 }
 
+/** Renders a reel resolver's {value, format} metric using the same
+ * formatters as the rest of the app, so a number computed on the backend
+ * always reads identically to the equivalent figure on Areas/Communities/
+ * Projects pages. */
+export function formatReelMetric(value: number | string | null, format: string): string {
+  if (value === null || value === undefined) return "N/A";
+  switch (format) {
+    case "aed":
+      return formatAed(typeof value === "number" ? value : Number(value));
+    case "pct":
+      return formatPct(typeof value === "number" ? value : Number(value));
+    case "pct_signed":
+      return formatPct(typeof value === "number" ? value : Number(value), { withSign: true });
+    case "psf":
+      return formatPsf(typeof value === "number" ? value : Number(value));
+    case "count":
+      return typeof value === "number" ? formatNumber(value) : String(value);
+    default:
+      return String(value);
+  }
+}
+
 /** Most scraped Propsearch photo URLs are the `_xl` (largest) variant, but a
  * handful of area photos were only ever captured at `_sm`/`_md`/`_lg` and
  * look blurry when stretched into a full-width banner. Try the `_xl` variant

@@ -22,6 +22,7 @@ from apps.api.routers import (
     overview,
     projects,
     pulse,
+    reels,
     rentals,
     sales,
     search,
@@ -69,6 +70,7 @@ app.include_router(signals.router, prefix="/api/signals", tags=["signals"])
 app.include_router(decision_engine.router, prefix="/api/decision-engine", tags=["decision-engine"])
 app.include_router(search.router, prefix="/api/search", tags=["search"])
 app.include_router(construction_watch.router, prefix="/api/construction-watch", tags=["construction-watch"])
+app.include_router(reels.router, prefix="/api/reels", tags=["reels"])
 
 
 @app.get("/api/health")

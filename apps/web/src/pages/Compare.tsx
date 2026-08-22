@@ -80,6 +80,13 @@ export function Compare() {
       {keys.length < 2 && <EmptyState title="Add at least 2 communities to compare" detail="Search above and select up to 5." />}
       {compare.isLoading && <LoadingSkeleton rows={6} />}
       {compare.error && <ErrorState message={(compare.error as Error).message} />}
+      {compare.data && compare.data.items.some((c) => c.data_source === "project_matched") && (
+        <p className="text-xs text-[var(--text-muted)]">
+          Sub-districts ({compare.data.items.filter((c) => c.data_source === "project_matched").map((c) => c.community_name).join(", ")}) don't
+          get their own DLD area label, so their figures are recovered via project-level matching against the scraped project catalog rather than
+          DLD's direct area field — same underlying transactions, just joined a different way.
+        </p>
+      )}
       {compare.data && (
         <Card className="p-4 overflow-x-auto">
           <SectionHeader title={`Side-by-Side — ${compare.data.period}`} />
