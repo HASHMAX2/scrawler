@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, type LivabilityPanel as LivabilityPanelData } from "../lib/api";
 import { useFilters } from "../state/FilterContext";
 import { Card, ErrorState, KpiCard, LoadingSkeleton, SectionHeader, SignalBadge } from "../components/ui";
-import { formatAed, formatPct, onHeroImageError, upgradeToXlImage } from "../lib/format";
+import { formatAed, formatNumber, formatPct, onHeroImageError, upgradeToXlImage } from "../lib/format";
 
 export function CommunityDetail() {
   const { key } = useParams<{ key: string }>();
@@ -55,8 +55,8 @@ export function CommunityDetail() {
         <KpiCard label="Est. Gross Yield" value={data.estimated_gross_yield_pct !== null ? formatPct(data.estimated_gross_yield_pct) : "N/A"} />
         <KpiCard label="Rental Contracts" value={data.rentals.count.toLocaleString()} confidence={data.rentals.confidence} />
         <KpiCard label="Median Rent" value={formatAed(data.rentals.median_rent)} />
-        <KpiCard label="New Contracts" value={data.rentals.new_contracts.toLocaleString()} />
-        <KpiCard label="Renewals" value={data.rentals.renewals.toLocaleString()} />
+        <KpiCard label="New Contracts" value={formatNumber(data.rentals.new_contracts)} />
+        <KpiCard label="Renewals" value={formatNumber(data.rentals.renewals)} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

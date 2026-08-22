@@ -92,7 +92,7 @@ export interface LivabilityPanel {
 export interface CommunityDetail {
   community_key: string; community_name: string; has_scraped_profile: boolean; period: string;
   sales: { count: number; value: number | null; median_price: number | null; median_psf: number | null; confidence: string };
-  rentals: { count: number; median_rent: number | null; renewals: number; new_contracts: number; confidence: string };
+  rentals: { count: number; median_rent: number | null; renewals: number | null; new_contracts: number | null; confidence: string };
   estimated_gross_yield_pct: number | null;
   bedroom_demand: {
     sales: { bedroom: string; count: number; share_pct: number | null }[];
