@@ -17,6 +17,31 @@ router = APIRouter()
 MAX_DEPTH = 8
 
 
+def _effective_stats(direct: dict, project_matched: dict) -> dict:
+    """DLD's own AREA_EN field resolves some areas (Silicon Oasis, Dubai
+    South, JLT, ...) far more sparsely than the project-matched join does —
+    e.g. Silicon Oasis shows 1 direct sale vs 240 recovered via project
+    matching. Neither source is reliably bigger for every area, and sales
+    vs rentals can disagree even within the same area, so pick whichever
+    source has the higher count independently for sales and for rentals,
+    keeping that source's own price/rent paired together so yield stays
+    internally consistent rather than mixing sources.
+    """
+    use_pm_sales = project_matched["sales_count"] > direct["sales_count"]
+    use_pm_rentals = project_matched["rental_count"] > direct["rental_count"]
+    sales_count = project_matched["sales_count"] if use_pm_sales else direct["sales_count"]
+    sales_value = project_matched["sales_value"] if use_pm_sales else direct["sales_value"]
+    median_price = project_matched["median_price"] if use_pm_sales else direct["median_price"]
+    rental_count = project_matched["rental_count"] if use_pm_rentals else direct["rental_count"]
+    median_rent = project_matched["median_rent"] if use_pm_rentals else direct["median_rent"]
+    return {
+        "sales_count": sales_count, "sales_value": sales_value, "median_price": median_price,
+        "rental_count": rental_count, "median_rent": median_rent,
+        "estimated_gross_yield_pct": estimated_gross_yield(median_rent, median_price),
+        "data_source": {"sales": "project_matched" if use_pm_sales else "dld_direct", "rentals": "project_matched" if use_pm_rentals else "dld_direct"},
+    }
+
+
 def _subtree_ids(con, root_id: int) -> list[int]:
     rows = con.execute(
         f"""
@@ -237,17 +262,17 @@ def list_top_level_areas(period: str = "90d", con=Depends(db)):
         r = rentals_by_root.get(area_id, (0, None))
         ps = proj_sales_by_root.get(area_id, (0, None, None))
         pr = proj_rentals_by_root.get(area_id, (0, None))
+        direct = {"sales_count": s[0], "sales_value": s[1], "median_price": s[2], "rental_count": r[0], "median_rent": r[1]}
+        project_matched = {"sales_count": ps[0], "sales_value": ps[1], "median_price": ps[2], "rental_count": pr[0], "median_rent": pr[1]}
+
         items.append({
             "area_id": area_id, "name": name, "hero_image_url": hero, "also_known_as": aka,
             "child_count": child_count[area_id], "descendant_count": subtree_size[area_id] - 1,
             "project_matched_stats": {
-                "sales_count": ps[0], "sales_value": ps[1], "median_price": ps[2],
-                "rental_count": pr[0], "median_rent": pr[1],
+                **project_matched,
                 "estimated_gross_yield_pct": estimated_gross_yield(pr[1], ps[2]),
             },
-            "sales_count": s[0], "sales_value": s[1], "median_price": s[2],
-            "rental_count": r[0], "median_rent": r[1],
-            "estimated_gross_yield_pct": estimated_gross_yield(r[1], s[2]),
+            **_effective_stats(direct, project_matched),
         })
     items.sort(key=lambda x: x["sales_count"] + x["rental_count"], reverse=True)
     return {"period": window.label, "items": items}
@@ -272,12 +297,14 @@ def area_detail(area_id: int, period: str = "90d", con=Depends(db)):
         cur_name = prow[2]
     breadcrumb.reverse()
 
-    own_stats = _rollup_stats(con, [area_id], window)
     own_project_matched_stats = _project_matched_stats(con, [area_id], window)
+    own_direct = _rollup_stats(con, [area_id], window)
+    own_stats = {**own_direct, **_effective_stats(own_direct, own_project_matched_stats)}
     subtree = _subtree_ids(con, area_id)
     if len(subtree) > 1:
-        subtree_stats = _rollup_stats(con, subtree, window)
         subtree_project_matched_stats = _project_matched_stats(con, subtree, window)
+        subtree_direct = _rollup_stats(con, subtree, window)
+        subtree_stats = {**subtree_direct, **_effective_stats(subtree_direct, subtree_project_matched_stats)}
     else:
         subtree_stats = own_stats
         subtree_project_matched_stats = own_project_matched_stats
@@ -297,12 +324,9 @@ def area_detail(area_id: int, period: str = "90d", con=Depends(db)):
             "area_id": cid, "name": cname, "hero_image_url": chero,
             "community_key": f"s{cid}", "child_count": _child_count(con, cname),
             "project_matched_stats": c_project_stats,
-            **c_stats,
+            **_effective_stats(c_stats, c_project_stats),
         })
-    children.sort(
-        key=lambda x: x["sales_count"] + x["rental_count"] + x["project_matched_stats"]["sales_count"] + x["project_matched_stats"]["rental_count"],
-        reverse=True,
-    )
+    children.sort(key=lambda x: x["sales_count"] + x["rental_count"], reverse=True)
 
     match_confidence = con.execute("SELECT match_confidence FROM dim_area WHERE scraped_area_id = ? LIMIT 1", [area_id]).fetchone()
 

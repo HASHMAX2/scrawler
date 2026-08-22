@@ -146,13 +146,14 @@ export function AreaDetail() {
 }
 
 function ChildCard({ child, onClick }: { child: AreaChildItem; onClick: () => void }) {
-  // DLD's own area label never resolves this finely, so the direct figures
-  // (child.sales_count/rental_count) are almost always zero for a sub-area —
-  // the project-matched figures are the ones with real signal here.
-  const pm = child.project_matched_stats;
-  const sales = child.sales_count > 0 ? child.sales_count : pm.sales_count;
-  const rentals = child.rental_count > 0 ? child.rental_count : pm.rental_count;
-  const viaProjectMatch = child.sales_count === 0 && child.rental_count === 0 && (pm.sales_count > 0 || pm.rental_count > 0);
+  // The backend already picks whichever of the direct-DLD or project-matched
+  // figures is larger, independently for sales and rentals (DLD's own area
+  // label rarely resolves at sub-district grain, so project-matched is
+  // usually — but not always — the one with real signal) — child.sales_count
+  // / child.rental_count are that resolved value, never the raw DLD-only one.
+  const sales = child.sales_count;
+  const rentals = child.rental_count;
+  const viaProjectMatch = child.data_source.sales === "project_matched" || child.data_source.rentals === "project_matched";
 
   return (
     <Card className="overflow-hidden cursor-pointer hover:border-[var(--accent)] transition-colors">
@@ -177,7 +178,7 @@ function ChildCard({ child, onClick }: { child: AreaChildItem; onClick: () => vo
             <span><span className="text-[var(--text-muted)]">Sales:</span> {sales.toLocaleString()}</span>
             <span><span className="text-[var(--text-muted)]">Rentals:</span> {rentals.toLocaleString()}</span>
           </div>
-          {pm.median_price !== null && <div className="text-[10px] text-[var(--text-muted)] mt-1">Median: {formatAed(pm.median_price)}</div>}
+          {child.median_price !== null && <div className="text-[10px] text-[var(--text-muted)] mt-1">Median: {formatAed(child.median_price)}</div>}
           {viaProjectMatch && <div className="text-[9px] text-[var(--text-muted)] mt-0.5 italic">via matched projects</div>}
         </div>
       </button>

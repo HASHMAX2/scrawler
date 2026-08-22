@@ -46,17 +46,20 @@ export interface AreaRollupStats {
   sales_count: number; sales_value: number | null; median_price: number | null;
   rental_count: number; median_rent: number | null; estimated_gross_yield_pct: number | null;
 }
+export interface AreaDataSource { sales: "dld_direct" | "project_matched"; rentals: "dld_direct" | "project_matched" }
 
 export interface AreaListItem extends AreaRollupStats {
   area_id: number; name: string; hero_image_url: string | null; also_known_as: string | null;
   child_count: number; descendant_count: number;
   project_matched_stats: AreaRollupStats;
+  data_source: AreaDataSource;
 }
 export interface AreaListResponse { period: string; items: AreaListItem[] }
 
 export interface AreaChildItem extends AreaRollupStats {
   area_id: number; name: string; hero_image_url: string | null; community_key: string; child_count: number;
   project_matched_stats: AreaRollupStats;
+  data_source: AreaDataSource;
 }
 
 export interface AreaProjectItem {
@@ -72,9 +75,9 @@ export interface AreaDetailResponse {
   profile: AreaProfile | null;
   livability: LivabilityPanel | null;
   period: string;
-  own_stats: AreaRollupStats;
+  own_stats: AreaRollupStats & { data_source: AreaDataSource };
   own_project_matched_stats: AreaRollupStats;
-  subtree_stats: AreaRollupStats;
+  subtree_stats: AreaRollupStats & { data_source: AreaDataSource };
   subtree_project_matched_stats: AreaRollupStats;
   child_count: number;
   children: AreaChildItem[];
