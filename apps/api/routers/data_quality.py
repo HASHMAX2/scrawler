@@ -38,6 +38,8 @@ def data_quality_summary(con=Depends(db)):
     master_project_count = con.execute("SELECT count(*) FROM dim_master_project").fetchone()[0]
     multi_building_count = con.execute("SELECT count(*) FROM dim_master_project WHERE building_count > 1").fetchone()[0]
 
+    scraped_cross_check = _scraped_transaction_cross_check(con)
+
     return {
         "area_match_confidence": {c: n for c, n in area_confidence},
         "project_match_confidence": {c: n for c, n in project_confidence},
@@ -57,6 +59,76 @@ def data_quality_summary(con=Depends(db)):
             "needs_review_count": needs_review_count,
             "grouping_method_breakdown": {m: n for m, n in hierarchy_methods},
         },
+        "scraped_cross_check": scraped_cross_check,
+    }
+
+
+def _scraped_transaction_cross_check(con) -> dict:
+    """Propsearch's own scraped `transactions` table (4,039 rows, independent
+    of the DLD bulk CSVs) sat completely unused. It's a second, independent
+    sample of the same underlying sale events — a free cross-check on our
+    DLD-derived fact_sales, not a replacement for it (its sample is far
+    smaller). Compares per-project median price and transaction count for
+    every project with matched scraped transactions, so large disagreements
+    are visible rather than silently trusted.
+    """
+    total_scraped = con.execute("SELECT count(*) FROM scraped.transactions").fetchone()[0]
+    matched = con.execute("SELECT count(*) FROM scraped.transactions WHERE development_id IS NOT NULL").fetchone()[0]
+    with_dld_counterpart = con.execute(
+        """
+        SELECT count(DISTINCT t.development_id) FROM scraped.transactions t
+        JOIN dim_project dp ON dp.matched_development_id = t.development_id
+        WHERE t.development_id IS NOT NULL
+        """
+    ).fetchone()[0]
+
+    rows = con.execute(
+        """
+        WITH scraped_agg AS (
+            SELECT t.development_id, count(*) c, median(t.price_aed) med_price
+            FROM scraped.transactions t
+            WHERE t.development_id IS NOT NULL AND t.price_aed IS NOT NULL
+            GROUP BY 1
+            HAVING count(*) >= 2
+        )
+        SELECT d.name, sa.c, sa.med_price, dld.c, dld.med_price
+        FROM scraped_agg sa
+        JOIN scraped.developments d ON sa.development_id = d.id
+        LEFT JOIN (
+            SELECT dp.matched_development_id AS development_id, count(*) c, median(fs.trans_value_aed) med_price
+            FROM fact_sales fs JOIN dim_project dp ON fs.project_id = dp.project_id
+            WHERE dp.matched_development_id IS NOT NULL AND fs.group_en = 'Sales'
+            GROUP BY 1
+        ) dld ON sa.development_id = dld.development_id
+        ORDER BY (dld.c IS NOT NULL) DESC, sa.c DESC
+        LIMIT 30
+        """
+    ).fetchall()
+
+    items = []
+    for name, scraped_count, scraped_median, dld_count, dld_median in rows:
+        price_diff_pct = None
+        if scraped_median and dld_median:
+            price_diff_pct = round((scraped_median - dld_median) / dld_median * 100, 1)
+        items.append({
+            "development_name": name,
+            "scraped_transaction_count": scraped_count,
+            "scraped_median_price": scraped_median,
+            "dld_transaction_count": dld_count or 0,
+            "dld_median_price": dld_median,
+            "median_price_diff_pct": price_diff_pct,
+        })
+
+    return {
+        "total_scraped_transactions": total_scraped,
+        "matched_to_development": matched,
+        "developments_with_dld_counterpart": with_dld_counterpart,
+        "projects_compared": items,
+        "note": (
+            "Propsearch scrapes only a small recent sample per project page (max observed: 2 per development here), so this is "
+            "directional, not statistically powered. Most scraped developments also have no DLD-side project match yet (entity "
+            "resolution gap, not a data error) — rows with a DLD counterpart are sorted first; rows below them show scraped-only figures."
+        ),
     }
 
 

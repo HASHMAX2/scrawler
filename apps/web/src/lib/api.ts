@@ -37,9 +37,26 @@ export interface CommunityListItem {
   community_key: string; community_name: string; has_scraped_profile: boolean;
   sales_count: number; sales_value: number | null; median_price: number | null; median_psf: number | null;
   rental_count: number; median_rent: number | null; estimated_gross_yield_pct: number | null;
+  hero_image_url: string | null;
 }
 
 export interface CommunityList { period: string; page: number; page_size: number; total: number; items: CommunityListItem[] }
+
+export interface AreaProfile {
+  description: string | null; also_known_as: string | null; hero_image_url: string | null;
+  dld_community_name_en: string | null; dld_buildings: number | null; dld_villas: number | null;
+  dld_residential_units: number | null; dld_commercial_units: number | null;
+}
+
+export interface SchoolItem { name: string; curriculum: string; rating: string | null; distance_text: string | null; fees_text: string | null }
+
+export interface LivabilityPanel {
+  amenity_counts: { category: string; count: number }[];
+  total_amenities: number;
+  school_curriculum_counts: { curriculum: string; count: number }[];
+  total_schools: number;
+  top_schools: SchoolItem[];
+}
 
 export interface CommunityDetail {
   community_key: string; community_name: string; has_scraped_profile: boolean; period: string;
@@ -54,6 +71,8 @@ export interface CommunityDetail {
   top_developers: { name: string; project_count: number }[];
   upcoming_supply_units: number | null;
   oversupply_risk: OversupplyRisk;
+  area_profile: AreaProfile | null;
+  livability: LivabilityPanel | null;
 }
 
 export interface OversupplyRisk {
@@ -93,6 +112,15 @@ export interface UnitTypeItem {
 }
 export interface UnitTypesResponse { period: string; community_key: string | null; items: UnitTypeItem[] }
 
+export interface ScrapedCrossCheckItem {
+  development_name: string; scraped_transaction_count: number; scraped_median_price: number | null;
+  dld_transaction_count: number; dld_median_price: number | null; median_price_diff_pct: number | null;
+}
+export interface ScrapedCrossCheck {
+  total_scraped_transactions: number; matched_to_development: number; developments_with_dld_counterpart: number;
+  projects_compared: ScrapedCrossCheckItem[]; note: string;
+}
+
 export interface DataQuality {
   area_match_confidence: Record<string, number>;
   project_match_confidence: Record<string, number>;
@@ -100,18 +128,34 @@ export interface DataQuality {
   unmatched_project_sales_rows: number; unmatched_project_rental_rows: number;
   missing_project_sales_rows: number; missing_project_rental_rows: number;
   invalid_price_rows: number; invalid_rent_rows: number;
+  scraped_cross_check: ScrapedCrossCheck;
+}
+
+export interface ConstructionWatchItem {
+  change_id: number; development_id: number; development_name: string; area_name: string | null;
+  field_name: string; old_value: string | null; new_value: string | null; detected_at: string;
+  master_project_slug: string | null;
+}
+export interface ConstructionWatchResponse {
+  items: ConstructionWatchItem[];
+  field_counts: Record<string, number>;
+  flipped_to_completed_total: number;
+  watched_fields: string[];
 }
 
 export interface ExplorerResponse<T> { page: number; page_size: number; total: number; items: T[] }
 export interface SaleRow { sale_id: number; instance_date: string; community: string; project: string | null; property_type: string; bedroom: string | null; price: number; area_sqm: number; price_per_sqft: number | null; is_offplan: boolean }
 export interface RentalRow { rental_id: number; registration_date: string; community: string; project: string | null; property_type: string; bedroom: string | null; annual_rent: number; area_sqm: number; rent_per_sqft: number | null; is_renewal: boolean }
 
-export interface MapDevelopment { development_id: number; name: string; lat: number; lng: number; area_name: string | null; status: string | null; developer_name: string | null; total_units: number | null; sales_count: number }
+export interface MapDevelopment {
+  development_id: number; name: string; lat: number; lng: number; area_name: string | null; status: string | null;
+  developer_name: string | null; total_units: number | null; hero_image_url: string | null; sales_count: number;
+}
 
 export interface ProjectListItem {
   project_id: number; name: string; matched_development_id: number | null; developer_name: string | null;
   sales_count: number; sales_value: number | null; rental_count: number;
-  building_slug: string | null; master_slug: string | null;
+  building_slug: string | null; master_slug: string | null; hero_image_url: string | null;
 }
 export interface DeveloperListItem { developer_id: number; name: string; project_count: number; sales_count: number; sales_value: number; market_share_pct: number | null }
 
@@ -182,12 +226,46 @@ export interface SearchSuggestResponse { query: string; items: SearchSuggestItem
 
 export interface ProjectBuildingRef { project_id: number; name: string; building_label: string | null; slug: string; grouping_method: string }
 
+export interface ConstructionMilestone { label: string; date_raw: string | null; date_parsed: string | null }
+export interface ConstructionUpdate { date_raw: string | null; date_parsed: string | null; description: string }
+export interface ConstructionCompany { role: string; name: string; url: string | null }
+export interface ProjectDocumentGroup { doc_type: string; total_photos: number; cover_photo_urls: string[] }
+
+export interface ScrapedEnrichment {
+  source_development_id: number;
+  source_building_name: string | null;
+  hero_image_url: string | null;
+  building_type: string | null;
+  status: string | null;
+  raw_status: string | null;
+  storeys: string | null;
+  total_units: number | null;
+  total_units_raw: string | null;
+  project_value_aed: number | null;
+  project_value_usd: number | null;
+  official_website: string | null;
+  plot_reference: string | null;
+  overview_text: string | null;
+  construction_start_date: string | null;
+  estimated_completion_date: string | null;
+  actual_completion_date: string | null;
+  first_trace_date: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_multi_building: boolean;
+  companies: ConstructionCompany[];
+  milestones: ConstructionMilestone[];
+  updates: ConstructionUpdate[];
+  documents: ProjectDocumentGroup[];
+}
+
 export interface MasterProjectDetail {
   master_project_id: number; slug: string; name: string;
   developer_name: string | null; area_name: string | null;
   building_count: number; needs_review: boolean;
   buildings: ProjectBuildingRef[];
   selected_building: { project_id: number; name: string; building_label: string | null; slug: string } | null;
+  scraped_enrichment: ScrapedEnrichment | null;
   period: string;
   filters: { unit_type: string | null; transaction_type: string | null };
   kpis: {
@@ -267,6 +345,7 @@ export const api = {
   searchSuggest: (q: string, limit = 12) => get<SearchSuggestResponse>("/search/suggest", { q, limit }),
   masterProjectDetail: (slug: string, period: string, building_slug?: string, unit_type?: string, transaction_type?: string) =>
     get<MasterProjectDetail>(`/projects/master/${encodeURIComponent(slug)}`, { period, building_slug, unit_type, transaction_type }),
+  constructionWatch: (field?: string, limit = 50) => get<ConstructionWatchResponse>("/construction-watch", { field, limit }),
 };
 
 export async function refreshData(): Promise<unknown> {

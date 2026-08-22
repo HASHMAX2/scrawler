@@ -65,6 +65,47 @@ export function DataQuality() {
       </Card>
 
       <Card className="p-4">
+        <SectionHeader title={`Propsearch Transaction Cross-Check (${data.scraped_cross_check.matched_to_development.toLocaleString()} of ${data.scraped_cross_check.total_scraped_transactions.toLocaleString()} scraped transactions matched to a development)`} />
+        <p className="text-xs text-[var(--text-muted)] mb-3">{data.scraped_cross_check.note}</p>
+        {data.scraped_cross_check.projects_compared.length === 0 ? (
+          <div className="text-xs text-[var(--text-muted)]">No projects with enough matched scraped transactions to compare.</div>
+        ) : (
+          <div className="max-h-96 overflow-y-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-[var(--text-muted)] text-xs">
+                  <th className="py-1">Development</th>
+                  <th className="py-1 text-right">Scraped (n)</th>
+                  <th className="py-1 text-right">Scraped Median</th>
+                  <th className="py-1 text-right">DLD (n)</th>
+                  <th className="py-1 text-right">DLD Median</th>
+                  <th className="py-1 text-right">Diff</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.scraped_cross_check.projects_compared.map((p) => (
+                  <tr key={p.development_name} className="border-t border-[var(--border)]/40">
+                    <td className="py-1">{p.development_name}</td>
+                    <td className="py-1 text-right">{p.scraped_transaction_count}</td>
+                    <td className="py-1 text-right">{p.scraped_median_price?.toLocaleString() ?? "—"}</td>
+                    <td className="py-1 text-right">{p.dld_transaction_count}</td>
+                    <td className="py-1 text-right">{p.dld_median_price?.toLocaleString() ?? "—"}</td>
+                    <td className="py-1 text-right">
+                      {p.median_price_diff_pct !== null ? (
+                        <SignalBadge tone={Math.abs(p.median_price_diff_pct) > 25 ? "warn" : "neutral"}>
+                          {p.median_price_diff_pct > 0 ? "+" : ""}{p.median_price_diff_pct.toFixed(1)}%
+                        </SignalBadge>
+                      ) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      <Card className="p-4">
         <SectionHeader title="Files Imported" />
         <table className="w-full text-sm">
           <thead>

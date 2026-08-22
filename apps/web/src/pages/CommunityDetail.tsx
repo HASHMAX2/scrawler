@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../lib/api";
+import { api, type LivabilityPanel as LivabilityPanelData } from "../lib/api";
 import { useFilters } from "../state/FilterContext";
 import { Card, ErrorState, KpiCard, LoadingSkeleton, SectionHeader, SignalBadge } from "../components/ui";
 import { formatAed, formatPct } from "../lib/format";
@@ -18,14 +18,23 @@ export function CommunityDetail() {
   if (error) return <ErrorState message={(error as Error).message} />;
   if (!data) return null;
 
+  const profile = data.area_profile;
+
   return (
     <div className="space-y-6">
       <div>
         <Link to="/communities" className="text-xs text-[var(--accent)]">&larr; Communities</Link>
-        <div className="flex items-center gap-2 mt-1">
+        {profile?.hero_image_url && (
+          <div className="mt-2 rounded-lg overflow-hidden border border-[var(--border)]" style={{ height: 160 }}>
+            <img src={profile.hero_image_url} alt={data.community_name} className="w-full h-full object-cover" loading="lazy" />
+          </div>
+        )}
+        <div className="flex items-center gap-2 mt-2">
           <h1 className="text-lg font-semibold">{data.community_name}</h1>
+          {profile?.also_known_as && <span className="text-xs text-[var(--text-muted)]">({profile.also_known_as})</span>}
           {!data.has_scraped_profile && <SignalBadge tone="neutral">No scraped profile — DLD data only</SignalBadge>}
         </div>
+        {profile?.description && <p className="text-xs text-[var(--text-muted)] mt-1 max-w-2xl">{profile.description}</p>}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -96,6 +105,8 @@ export function CommunityDetail() {
         </Card>
       </div>
 
+      {data.livability && <LivabilityPanel livability={data.livability} />}
+
       <Card className="p-4">
         <SectionHeader title="Oversupply Risk" />
         {data.oversupply_risk.risk === "insufficient_data" ? (
@@ -113,6 +124,50 @@ export function CommunityDetail() {
           </div>
         )}
         <p className="text-[10px] text-[var(--text-muted)] mt-2">{data.oversupply_risk.note ?? "Non-predictive: incoming known units relative to trailing observed demand, not a forecast."}</p>
+      </Card>
+    </div>
+  );
+}
+
+function LivabilityPanel({ livability }: { livability: LivabilityPanelData }) {
+  if (livability.total_amenities === 0 && livability.total_schools === 0) return null;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Card className="p-4">
+        <SectionHeader title={`Amenities (${livability.total_amenities})`} />
+        <ul className="space-y-1 text-sm">
+          {livability.amenity_counts.map((a) => (
+            <li key={a.category} className="flex justify-between border-b border-[var(--border)]/40 py-1">
+              <span>{a.category}</span>
+              <span className="text-[var(--text-muted)]">{a.count.toLocaleString()}</span>
+            </li>
+          ))}
+          {livability.amenity_counts.length === 0 && <li className="text-[var(--text-muted)]">No scraped amenity data for this area</li>}
+        </ul>
+      </Card>
+      <Card className="p-4">
+        <SectionHeader
+          title={`Schools (${livability.total_schools})`}
+          action={
+            <span className="text-[10px] text-[var(--text-muted)]">
+              {livability.school_curriculum_counts.map((c) => `${c.curriculum.replace(" Schools", "")}: ${c.count}`).join(" · ")}
+            </span>
+          }
+        />
+        <ul className="space-y-1.5 text-sm max-h-64 overflow-y-auto">
+          {livability.top_schools.map((s) => (
+            <li key={s.name} className="border-b border-[var(--border)]/40 py-1">
+              <div className="flex justify-between">
+                <span>{s.name}</span>
+                {s.rating && <span className="text-[var(--text-muted)] text-xs">{s.rating}</span>}
+              </div>
+              <div className="text-[10px] text-[var(--text-muted)]">
+                {s.curriculum}{s.distance_text ? ` · ${s.distance_text}` : ""}{s.fees_text ? ` · ${s.fees_text}` : ""}
+              </div>
+            </li>
+          ))}
+          {livability.top_schools.length === 0 && <li className="text-[var(--text-muted)]">No scraped school data for this area</li>}
+        </ul>
       </Card>
     </div>
   );

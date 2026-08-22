@@ -14,6 +14,7 @@ const NAV_SECTIONS: { title: string; items: { to: string; label: string }[] }[] 
       { to: "/projects", label: "Projects" },
       { to: "/developers", label: "Developers" },
       { to: "/supply", label: "Supply" },
+      { to: "/construction-watch", label: "Construction Watch" },
     ],
   },
   {

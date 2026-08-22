@@ -24,6 +24,11 @@ export function Communities() {
       key: "name", header: "Community",
       render: (r) => (
         <span className="flex items-center gap-2">
+          {r.hero_image_url ? (
+            <img src={r.hero_image_url} alt="" className="w-8 h-8 rounded object-cover shrink-0" loading="lazy" />
+          ) : (
+            <span className="w-8 h-8 rounded bg-[var(--surface-2)] shrink-0" />
+          )}
           {r.community_name}
           {!r.has_scraped_profile && <SignalBadge tone="neutral">no profile yet</SignalBadge>}
         </span>

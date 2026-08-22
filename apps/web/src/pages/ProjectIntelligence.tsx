@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { api, type MasterProjectDetail, type RentalRow, type SaleRow } from "../lib/api";
+import { api, type MasterProjectDetail, type RentalRow, type SaleRow, type ScrapedEnrichment } from "../lib/api";
 import { ChartCard } from "../components/ChartCard";
 import { DataTable, type Column } from "../components/DataTable";
 import { Card, ConfidenceBadge, EmptyState, ErrorState, KpiCard, LoadingSkeleton, SectionHeader, Select, SignalBadge } from "../components/ui";
@@ -66,6 +66,8 @@ export function ProjectIntelligence() {
 
       <BuildingSelector data={data} activeBuildingSlug={buildingSlug ?? null} onSelect={selectBuilding} />
 
+      {data.scraped_enrichment && <ScrapedProfileSection enrichment={data.scraped_enrichment} buildingCount={data.building_count} />}
+
       <Card className="p-3 flex flex-wrap items-center gap-3">
         <div className="flex gap-1">
           {PERIOD_OPTIONS.map((o) => (
@@ -103,10 +105,16 @@ export function ProjectIntelligence() {
 }
 
 function ProjectHeader({ data }: { data: MasterProjectDetail }) {
+  const heroUrl = data.scraped_enrichment?.hero_image_url;
   return (
     <div>
       <Link to="/" className="text-xs text-[var(--accent)]">&larr; Overview</Link>
-      <div className="flex items-center gap-2 mt-1 flex-wrap">
+      {heroUrl && (
+        <div className="mt-2 rounded-lg overflow-hidden border border-[var(--border)]" style={{ height: 180 }}>
+          <img src={heroUrl} alt={data.name} className="w-full h-full object-cover" loading="lazy" />
+        </div>
+      )}
+      <div className="flex items-center gap-2 mt-2 flex-wrap">
         <h1 className="text-xl font-semibold uppercase tracking-wide">{data.name}</h1>
         {data.needs_review && <SignalBadge tone="warn">grouping needs review</SignalBadge>}
       </div>
@@ -118,6 +126,135 @@ function ProjectHeader({ data }: { data: MasterProjectDetail }) {
         {data.building_count > 1 ? `Master Development · ${data.building_count} buildings` : "Single Building Project"}
       </p>
     </div>
+  );
+}
+
+const STATUS_TONE: Record<string, "good" | "bad" | "warn" | "neutral"> = {
+  completed: "good", under_construction: "warn", planned: "neutral", announced: "neutral",
+  on_hold: "bad", delayed: "bad", cancelled: "bad", other: "neutral",
+};
+
+function ScrapedProfileSection({ enrichment: e, buildingCount }: { enrichment: ScrapedEnrichment; buildingCount: number }) {
+  return (
+    <div className="space-y-4">
+      <SectionHeader
+        title="Project Profile"
+        action={
+          buildingCount > 1 ? (
+            <span className="text-[10px] text-[var(--text-muted)]">
+              Scraped profile shown for {e.source_building_name ?? "one building"} in this family
+            </span>
+          ) : undefined
+        }
+      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-4 space-y-2 md:col-span-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {e.status && <SignalBadge tone={STATUS_TONE[e.status] ?? "neutral"}>{e.status.replace("_", " ")}</SignalBadge>}
+            {e.building_type && <span className="text-xs text-[var(--text-muted)]">{e.building_type}</span>}
+            {e.storeys && <span className="text-xs text-[var(--text-muted)]">· {e.storeys}</span>}
+          </div>
+          {e.overview_text && <p className="text-sm text-[var(--text)]">{e.overview_text}</p>}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs pt-2">
+            {e.total_units !== null && (
+              <div><span className="text-[var(--text-muted)]">Total Units:</span> {e.total_units.toLocaleString()}</div>
+            )}
+            {(e.project_value_aed !== null || e.project_value_usd !== null) && (
+              <div>
+                <span className="text-[var(--text-muted)]">Project Value:</span>{" "}
+                {e.project_value_aed !== null ? formatAed(e.project_value_aed) : null}
+                {e.project_value_usd !== null ? ` (USD ${(e.project_value_usd / 1_000_000).toFixed(1)}M)` : null}
+              </div>
+            )}
+            {e.plot_reference && <div><span className="text-[var(--text-muted)]">Plot:</span> {e.plot_reference}</div>}
+            {e.official_website && (
+              <div>
+                <span className="text-[var(--text-muted)]">Website:</span>{" "}
+                <a href={e.official_website} target="_blank" rel="noreferrer" className="text-[var(--accent)]">Official site &#8599;</a>
+              </div>
+            )}
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Companies</div>
+          {e.companies.length === 0 ? (
+            <div className="text-xs text-[var(--text-muted)]">No company data available</div>
+          ) : (
+            <ul className="space-y-1.5 text-xs">
+              {e.companies.map((c, i) => (
+                <li key={i} className="flex justify-between gap-2">
+                  <span className="text-[var(--text-muted)]">{c.role}</span>
+                  {c.url ? (
+                    <a href={c.url} target="_blank" rel="noreferrer" className="text-[var(--accent)] text-right">{c.name}</a>
+                  ) : (
+                    <span className="text-right">{c.name}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      {e.milestones.length > 0 && <ConstructionTimeline milestones={e.milestones} />}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {e.updates.length > 0 && (
+          <Card className="p-4">
+            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Construction Updates</div>
+            <ul className="space-y-2 text-xs max-h-64 overflow-y-auto">
+              {e.updates.map((u, i) => (
+                <li key={i} className="border-b border-[var(--border)]/40 pb-2">
+                  <div className="text-[var(--text-muted)]">{u.date_raw ?? u.date_parsed}</div>
+                  <div>{u.description}</div>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+        {e.documents.length > 0 && (
+          <Card className="p-4">
+            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Photos</div>
+            <div className="space-y-3">
+              {e.documents.map((d) => (
+                <div key={d.doc_type}>
+                  <div className="text-xs text-[var(--text-muted)] mb-1">
+                    {d.doc_type.replace("_", " ")} ({d.total_photos})
+                  </div>
+                  <div className="flex gap-1.5">
+                    {d.cover_photo_urls.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noreferrer" className="block w-16 h-16 rounded overflow-hidden border border-[var(--border)]">
+                        <img src={url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ConstructionTimeline({ milestones }: { milestones: ScrapedEnrichment["milestones"] }) {
+  return (
+    <Card className="p-4">
+      <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] mb-3">Construction Timeline</div>
+      <div className="flex items-stretch gap-0 overflow-x-auto">
+        {milestones.map((m, i) => (
+          <div key={i} className="flex items-center shrink-0">
+            <div className="flex flex-col items-center gap-1 px-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[var(--accent)]" />
+              <div className="text-xs font-medium text-center whitespace-nowrap">{m.label}</div>
+              <div className="text-[10px] text-[var(--text-muted)]">{m.date_raw ?? m.date_parsed ?? "N/A"}</div>
+            </div>
+            {i < milestones.length - 1 && <div className="h-px w-8 bg-[var(--border)]" />}
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 

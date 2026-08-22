@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -37,7 +38,7 @@ def list_projects(search: str | None = None, period: str = "90d", limit: int = 5
             WHERE registration_date BETWEEN ? AND ? GROUP BY 1
         )
         SELECT dp.project_id, dp.dld_project_name, dp.matched_development_id, dev.name,
-               COALESCE(s.c, 0), s.v, COALESCE(r.c, 0), dp.building_slug, mp.slug
+               COALESCE(s.c, 0), s.v, COALESCE(r.c, 0), dp.building_slug, mp.slug, d.hero_image_url
         FROM dim_project dp
         LEFT JOIN dim_master_project mp ON dp.master_project_id = mp.master_project_id
         LEFT JOIN s ON dp.project_id = s.project_id
@@ -57,7 +58,7 @@ def list_projects(search: str | None = None, period: str = "90d", limit: int = 5
             {
                 "project_id": r[0], "name": r[1], "matched_development_id": r[2], "developer_name": r[3],
                 "sales_count": r[4], "sales_value": r[5], "rental_count": r[6],
-                "building_slug": r[7], "master_slug": r[8],
+                "building_slug": r[7], "master_slug": r[8], "hero_image_url": r[9],
             }
             for r in rows
         ],
@@ -145,6 +146,118 @@ def _scope_clause(scope_ids: list[int], unit_type: str | None, transaction_type:
         elif transaction_type == "ready":
             clauses.append("is_offplan = false")
     return " AND ".join(clauses), params
+
+
+MILESTONE_ORDER = {
+    "First Trace": 0, "Estimated Start": 1, "Construction Started": 2,
+    "Revised Est. Completion": 3, "Estimated Completion": 3, "Construction Finished": 4,
+}
+
+
+def _scraped_enrichment(con, development_id: int, building_name: str | None) -> dict:
+    """Pulls the rich Propsearch-scraped profile for one development: facts,
+    developer/architect/contractor, construction milestones, dated progress
+    updates, and photo documents. Queried directly off the attached `scraped`
+    SQLite db — no warehouse rebuild needed, these tables were already there.
+    """
+    dev = con.execute(
+        """
+        SELECT d.name, d.building_type_raw, d.raw_status, d.normalized_status, d.storeys_raw,
+               d.total_units, d.total_units_raw, d.project_value_aed, d.project_value_usd,
+               d.official_website, d.plot_reference, d.overview_text, d.construction_start_date,
+               d.estimated_completion_date, d.actual_completion_date, d.first_trace_date,
+               d.hero_image_url, d.latitude, d.longitude, d.is_multi_building
+        FROM scraped.developments d WHERE d.id = ?
+        """,
+        [development_id],
+    ).fetchone()
+    if not dev:
+        return None
+
+    companies = con.execute(
+        """
+        SELECT role, company_name, company_url FROM scraped.construction_history
+        WHERE development_id = ?
+        ORDER BY CASE role WHEN 'Developer' THEN 0 WHEN 'Architect' THEN 1 WHEN 'Contractor' THEN 2 ELSE 3 END
+        """,
+        [development_id],
+    ).fetchall()
+
+    milestones_raw = con.execute(
+        "SELECT label, date_raw, date_parsed FROM scraped.construction_milestones WHERE development_id = ?",
+        [development_id],
+    ).fetchall()
+    milestones = sorted(
+        ({"label": label, "date_raw": date_raw, "date_parsed": date_parsed} for label, date_raw, date_parsed in milestones_raw),
+        key=lambda m: MILESTONE_ORDER.get(m["label"], 99),
+    )
+
+    updates = con.execute(
+        """
+        SELECT DISTINCT date_raw, date_parsed, description FROM scraped.construction_updates
+        WHERE development_id = ? ORDER BY date_parsed DESC NULLS LAST, date_raw DESC LIMIT 15
+        """,
+        [development_id],
+    ).fetchall()
+
+    # Each re-crawl inserts a fresh snapshot row per doc_type (a growing photo
+    # gallery gets a new row over time, not an update to the old one) — take
+    # only the most-recently-seen snapshot per doc_type, or photo counts and
+    # cover images would be summed/duplicated across crawl history.
+    doc_rows = con.execute(
+        """
+        SELECT doc_type, photo_count, photo_urls_json FROM scraped.documents
+        WHERE development_id = ?
+        QUALIFY row_number() OVER (PARTITION BY doc_type ORDER BY last_seen DESC) = 1
+        """,
+        [development_id],
+    ).fetchall()
+    docs_by_type: dict[str, dict] = {}
+    for doc_type, photo_count, photo_urls_json in doc_rows:
+        bucket = docs_by_type.setdefault(doc_type, {"doc_type": doc_type, "total_photos": 0, "cover_photo_urls": []})
+        bucket["total_photos"] += photo_count or 0
+        if len(bucket["cover_photo_urls"]) < 3 and photo_urls_json:
+            try:
+                urls = json.loads(photo_urls_json)
+            except (TypeError, ValueError):
+                urls = []
+            for u in urls:
+                if len(bucket["cover_photo_urls"]) >= 3:
+                    break
+                bucket["cover_photo_urls"].append(u)
+
+    (name, building_type, raw_status, normalized_status, storeys, total_units, total_units_raw,
+     project_value_aed, project_value_usd, official_website, plot_reference, overview_text,
+     construction_start_date, estimated_completion_date, actual_completion_date, first_trace_date,
+     hero_image_url, latitude, longitude, is_multi_building) = dev
+
+    return {
+        "source_development_id": development_id,
+        "source_building_name": building_name or name,
+        "hero_image_url": hero_image_url,
+        "building_type": building_type,
+        "status": normalized_status,
+        "raw_status": raw_status,
+        "storeys": storeys,
+        "total_units": total_units,
+        "total_units_raw": total_units_raw,
+        "project_value_aed": project_value_aed,
+        "project_value_usd": project_value_usd,
+        "official_website": official_website,
+        "plot_reference": plot_reference,
+        "overview_text": overview_text,
+        "construction_start_date": construction_start_date,
+        "estimated_completion_date": estimated_completion_date,
+        "actual_completion_date": actual_completion_date,
+        "first_trace_date": first_trace_date,
+        "latitude": latitude,
+        "longitude": longitude,
+        "is_multi_building": bool(is_multi_building),
+        "companies": [{"role": r, "name": n, "url": u} for r, n, u in companies],
+        "milestones": milestones,
+        "updates": [{"date_raw": dr, "date_parsed": dp, "description": desc} for dr, dp, desc in updates],
+        "documents": sorted(docs_by_type.values(), key=lambda d: d["doc_type"]),
+    }
 
 
 @router.get("/master/{slug}")
@@ -337,6 +450,15 @@ def master_project_detail(
     for b in buildings:
         grouping_summary[b[4]] = grouping_summary.get(b[4], 0) + 1
 
+    if selected_building:
+        profile_dev_id = match[5]
+        profile_building_name = selected_building["name"]
+    else:
+        profile_candidate = next((b for b in buildings if b[5] is not None), None)
+        profile_dev_id = profile_candidate[5] if profile_candidate else None
+        profile_building_name = profile_candidate[1].strip() if profile_candidate else None
+    scraped_enrichment = _scraped_enrichment(con, profile_dev_id, profile_building_name) if profile_dev_id is not None else None
+
     return {
         "master_project_id": master_id,
         "slug": slug,
@@ -350,6 +472,7 @@ def master_project_detail(
             for b in buildings
         ],
         "selected_building": selected_building,
+        "scraped_enrichment": scraped_enrichment,
         "period": window.label,
         "filters": {"unit_type": unit_type, "transaction_type": transaction_type},
         "kpis": {

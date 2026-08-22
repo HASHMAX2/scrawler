@@ -20,6 +20,7 @@ import { Projects } from "./pages/Projects";
 import { ProjectIntelligence } from "./pages/ProjectIntelligence";
 import { Developers } from "./pages/Developers";
 import { Supply } from "./pages/Supply";
+import { ConstructionWatch } from "./pages/ConstructionWatch";
 import { Opportunities } from "./pages/Opportunities";
 import { MarketSignals } from "./pages/MarketSignals";
 import { DecisionEngine } from "./pages/DecisionEngine";
@@ -44,6 +45,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/projects/:slug/buildings/:buildingSlug" element={<ProjectIntelligence />} />
               <Route path="/developers" element={<Developers />} />
               <Route path="/supply" element={<Supply />} />
+              <Route path="/construction-watch" element={<ConstructionWatch />} />
               <Route path="/compare" element={<Compare />} />
               <Route path="/opportunities" element={<Opportunities />} />
               <Route path="/signals" element={<MarketSignals />} />

@@ -10,6 +10,7 @@ from ingestion import warehouse
 from apps.api.routers import (
     communities,
     compare,
+    construction_watch,
     data_quality,
     decision_engine,
     developers,
@@ -65,6 +66,7 @@ app.include_router(pulse.router, prefix="/api/pulse", tags=["pulse"])
 app.include_router(signals.router, prefix="/api/signals", tags=["signals"])
 app.include_router(decision_engine.router, prefix="/api/decision-engine", tags=["decision-engine"])
 app.include_router(search.router, prefix="/api/search", tags=["search"])
+app.include_router(construction_watch.router, prefix="/api/construction-watch", tags=["construction-watch"])
 
 
 @app.get("/api/health")

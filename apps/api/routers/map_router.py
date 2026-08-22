@@ -15,7 +15,7 @@ def map_developments(period: str = "90d", con=Depends(db)):
     rows = con.execute(
         """
         SELECT d.id, d.name, d.latitude, d.longitude, a.name AS area_name, d.normalized_status,
-               dev.name AS developer_name, d.total_units
+               dev.name AS developer_name, d.total_units, d.hero_image_url
         FROM scraped.developments d
         LEFT JOIN scraped.areas a ON d.area_id = a.id
         LEFT JOIN scraped.developers dev ON d.developer_id = dev.id
@@ -39,7 +39,7 @@ def map_developments(period: str = "90d", con=Depends(db)):
         "items": [
             {
                 "development_id": r[0], "name": r[1], "lat": r[2], "lng": r[3], "area_name": r[4],
-                "status": r[5], "developer_name": r[6], "total_units": r[7],
+                "status": r[5], "developer_name": r[6], "total_units": r[7], "hero_image_url": r[8],
                 "sales_count": activity.get(r[0], 0),
             }
             for r in rows

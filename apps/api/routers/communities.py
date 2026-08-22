@@ -57,10 +57,11 @@ def list_communities(
         )
         SELECT n.community_key, n.community_name, n.scraped_area_id,
                COALESCE(s.sales_count, 0) sales_count, s.sales_value, s.median_price, s.median_psf,
-               COALESCE(r.rental_count, 0) rental_count, r.median_rent
+               COALESCE(r.rental_count, 0) rental_count, r.median_rent, sa.hero_image_url
         FROM names n
         LEFT JOIN s ON n.community_key = s.community_key
         LEFT JOIN r ON n.community_key = r.community_key
+        LEFT JOIN scraped.areas sa ON n.scraped_area_id = sa.id
         {search_clause}
         ORDER BY {order_col} DESC NULLS LAST
         LIMIT ? OFFSET ?
@@ -81,6 +82,7 @@ def list_communities(
             "rental_count": r[7],
             "median_rent": r[8],
             "estimated_gross_yield_pct": estimated_gross_yield(r[8], r[5]),
+            "hero_image_url": r[9],
         })
 
     return {"period": window.label, "page": page, "page_size": page_size, "total": total, "items": items}
@@ -148,6 +150,8 @@ def community_detail(community_key: str, period: str = "90d", con=Depends(db)):
 
     top_developers = []
     upcoming_supply = None
+    area_profile = None
+    livability = None
     if scraped_area_id is not None:
         top_developers = con.execute(
             """
@@ -165,6 +169,8 @@ def community_detail(community_key: str, period: str = "90d", con=Depends(db)):
             """,
             [scraped_area_id],
         ).fetchone()[0]
+        area_profile = _area_profile(con, scraped_area_id)
+        livability = _livability_panel(con, scraped_area_id)
 
     yield_est = estimated_gross_yield(rental_summary[1], sales_summary[2])
 
@@ -198,4 +204,58 @@ def community_detail(community_key: str, period: str = "90d", con=Depends(db)):
         "top_developers": [{"name": n, "project_count": c} for n, c in top_developers],
         "upcoming_supply_units": upcoming_supply,
         "oversupply_risk": supply_risk,
+        "area_profile": area_profile,
+        "livability": livability,
+    }
+
+
+def _area_profile(con, scraped_area_id: int) -> dict:
+    row = con.execute(
+        """
+        SELECT description, also_known_as, hero_image_url, dld_community_name_en, dld_buildings, dld_villas,
+               dld_residential_units, dld_commercial_units
+        FROM scraped.areas WHERE id = ?
+        """,
+        [scraped_area_id],
+    ).fetchone()
+    if not row:
+        return None
+    description, also_known_as, hero_image_url, dld_community_name_en, dld_buildings, dld_villas, dld_res_units, dld_comm_units = row
+    return {
+        "description": description,
+        "also_known_as": also_known_as,
+        "hero_image_url": hero_image_url,
+        "dld_community_name_en": dld_community_name_en,
+        "dld_buildings": dld_buildings,
+        "dld_villas": dld_villas,
+        "dld_residential_units": dld_res_units,
+        "dld_commercial_units": dld_comm_units,
+    }
+
+
+def _livability_panel(con, scraped_area_id: int) -> dict:
+    amenity_counts = con.execute(
+        "SELECT category, count(DISTINCT name) FROM scraped.amenities WHERE area_id = ? GROUP BY 1 ORDER BY 2 DESC",
+        [scraped_area_id],
+    ).fetchall()
+    schools = con.execute(
+        """
+        SELECT name, curriculum, rating, distance_text, fees_text FROM scraped.schools
+        WHERE area_id = ? ORDER BY rating DESC NULLS LAST LIMIT 15
+        """,
+        [scraped_area_id],
+    ).fetchall()
+    school_curriculum_counts = con.execute(
+        "SELECT curriculum, count(*) FROM scraped.schools WHERE area_id = ? GROUP BY 1 ORDER BY 2 DESC",
+        [scraped_area_id],
+    ).fetchall()
+    return {
+        "amenity_counts": [{"category": c, "count": n} for c, n in amenity_counts],
+        "total_amenities": sum(n for _, n in amenity_counts),
+        "school_curriculum_counts": [{"curriculum": c, "count": n} for c, n in school_curriculum_counts],
+        "total_schools": sum(n for _, n in school_curriculum_counts),
+        "top_schools": [
+            {"name": n, "curriculum": c, "rating": r, "distance_text": d, "fees_text": f}
+            for n, c, r, d, f in schools
+        ],
     }

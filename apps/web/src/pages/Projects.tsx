@@ -14,7 +14,19 @@ export function Projects() {
   const { data, isLoading, error } = useQuery({ queryKey: ["projects", search, period], queryFn: () => api.projects(search || undefined, period, 50) });
 
   const columns: Column<ProjectListItem>[] = [
-    { key: "name", header: "Project", render: (r) => r.name },
+    {
+      key: "name", header: "Project",
+      render: (r) => (
+        <span className="flex items-center gap-2">
+          {r.hero_image_url ? (
+            <img src={r.hero_image_url} alt="" className="w-8 h-8 rounded object-cover shrink-0" loading="lazy" />
+          ) : (
+            <span className="w-8 h-8 rounded bg-[var(--surface-2)] shrink-0" />
+          )}
+          {r.name}
+        </span>
+      ),
+    },
     { key: "developer", header: "Developer", render: (r) => r.developer_name ?? "Unknown (unmatched to scraper)" },
     { key: "sales_count", header: "Sales", render: (r) => r.sales_count.toLocaleString(), align: "right" },
     { key: "sales_value", header: "Sales Value", render: (r) => formatAed(r.sales_value), align: "right" },
